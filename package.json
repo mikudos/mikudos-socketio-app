@@ -1,0 +1,51 @@
+{
+    "name": "mikudos-socketio-app",
+    "version": "0.0.4",
+    "description": "mikudos-socketio-app for connection and call methods and sync events on mikudos-socketio-app server, which is provided only for socket.io connection.",
+    "main": "lib/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "compile": "shx rm -rf lib/ && tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/mikudos/mikudos-socketio-app.git"
+    },
+    "keywords": [
+        "mikudos",
+        "socket.io",
+        "server"
+    ],
+    "author": "Julian Yue",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/mikudos/mikudos-socketio-app/issues"
+    },
+    "homepage": "https://github.com/mikudos/mikudos-socketio-app#readme",
+    "dependencies": {
+        "config": "^3.2.4",
+        "js-yaml": "^3.13.1",
+        "lodash": "^4.17.15",
+        "request": "^2.88.0",
+        "request-promise-native": "^1.0.8",
+        "socket.io": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/config": "0.0.35",
+        "@types/js-yaml": "^3.12.1",
+        "@types/lodash": "^4.14.149",
+        "@types/socket.io": "^2.1.4",
+        "@types/socket.io-client": "^1.4.32",
+        "shx": "^0.3.2",
+        "typescript": "^3.5.3"
+    },
+    "files": [
+        "lib",
+        "src",
+        "index.d.ts"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "types": "index.d.ts"
+}
