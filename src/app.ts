@@ -3,7 +3,7 @@ import socket from 'socket.io';
 import _ from 'lodash';
 import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
-import { ChatHandler, DUPLEX_HANDLER } from './common';
+import { CHAT_HANDLER, DUPLEX_HANDLER } from './common';
 
 declare namespace mikudos {
     interface ConfigFunc {
@@ -15,7 +15,7 @@ export class Application {
     settings: any;
     io: socket.Server;
     json_rpc_services?: JSON_RPC_HANDLER;
-    chat_services?: ChatHandler;
+    chat_services?: CHAT_HANDLER;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
     [key: string]: any;
