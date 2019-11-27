@@ -78,6 +78,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         // cancel first
         res.removeAllListeners();
         unset(this.socketStreams, `${socket.id}.${namespace}.${method}`);
+        return { result: { successed: true } };
     }
 
     cancelAllOnSocket(id: string) {
@@ -93,5 +94,6 @@ export class DUPLEX_HANDLER extends HandlerBase {
             }
         }
         unset(this.socketStreams, id);
+        return { result: { successed: true } };
     }
 }

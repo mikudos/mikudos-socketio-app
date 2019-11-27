@@ -3,7 +3,7 @@ import socket from 'socket.io';
 import _ from 'lodash';
 import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
-import { ChatHandler } from './common';
+import { ChatHandler, DUPLEX_HANDLER } from './common';
 
 declare namespace mikudos {
     interface ConfigFunc {
@@ -17,6 +17,7 @@ export class Application {
     json_rpc_services?: JSON_RPC_HANDLER;
     chat_services?: ChatHandler;
     authentication?: Authentication;
+    duplex_services?: DUPLEX_HANDLER;
     [key: string]: any;
     constructor(io: socket.Server) {
         this.io = io;
@@ -169,6 +170,65 @@ export class Application {
                 );
             }
 
+            if (this.duplex_services) {
+                socket.on(
+                    this.duplex_services.eventPath,
+                    async (data, callback: Function) => {
+                        const [namespace, method] = String(data.method).split(
+                            '.'
+                        );
+                        if (!this.duplex_services)
+                            throw new Error(
+                                'Chat service must be registered first'
+                            );
+                        let res = await this.duplex_services.handle(
+                            namespace,
+                            method,
+                            data.data,
+                            socket
+                        );
+                        callback(res);
+                    }
+                );
+                socket.on(
+                    `${this.duplex_services.eventPath} send`,
+                    async (data, callback: Function) => {
+                        const [namespace, method] = String(data.method).split(
+                            '.'
+                        );
+                        if (!this.duplex_services)
+                            throw new Error(
+                                'Chat service must be registered first'
+                            );
+                        let res = await this.duplex_services.send(
+                            namespace,
+                            method,
+                            data.data,
+                            socket
+                        );
+                        callback(res);
+                    }
+                );
+                socket.on(
+                    `${this.duplex_services.eventPath} cancel`,
+                    async (data, callback: Function) => {
+                        const [namespace, method] = String(data.method).split(
+                            '.'
+                        );
+                        if (!this.duplex_services)
+                            throw new Error(
+                                'Chat service must be registered first'
+                            );
+                        let res = await this.duplex_services.cancel(
+                            namespace,
+                            method,
+                            socket
+                        );
+                        callback(res);
+                    }
+                );
+            }
+
             socket.on('event', data => {
                 console.log('TCL: data', data);
                 /* … */
@@ -177,6 +237,9 @@ export class Application {
                 console.log('TCL: client disconnect');
                 console.log('rooms', socket.rooms);
                 socket.leaveAll();
+                if (this.duplex_services) {
+                    this.duplex_services.cancelAllOnSocket(socket.id);
+                }
                 /* … */
             });
             socket.on('disconnecting', reason => {
