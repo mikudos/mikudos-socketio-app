@@ -23,16 +23,14 @@ export class DUPLEX_HANDLER extends HandlerBase {
             set(this.socketStreams, socket.id, event);
         }
         try {
+            let before = this.namespaces[namespace].before || [];
+            for await (const fn of before) {
+                data = (await fn(namespace, method, data, socket)) || data;
+            }
             this.namespaces[namespace].handle(namespace, method, data, event);
-            console.log(
-                'TCL: this.socketStreams',
-                socket.id,
-                this.socketStreams
-            );
             this.socketStreams[socket.id].on(
                 `${namespace}.${method}`,
                 (data: any) => {
-                    console.log('TCL: socketStreams data', data);
                     socket.emit(
                         `${this.eventPath} ${namespace}.${method}`,
                         data
