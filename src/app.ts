@@ -110,7 +110,7 @@ export class Application {
                                     `Can not find Token at path: ${Auth.tokenPath}`
                                 );
                             socket.handshake.headers.authentication = token;
-                            socket.request.user = authResult.user;
+                            (socket as any).mikudos.user = authResult.user;
                             callback(authResult);
                         } catch (error) {
                             callback({
@@ -186,6 +186,7 @@ export class Application {
         });
     }
 
+    // TODO: channel to be finished
     publishEvent(response: any) {
         // this.io.to('authenticated').emit('rpc-call event', response);
         console.log('sockets', this.io.sockets.sockets);
@@ -204,7 +205,6 @@ export class Application {
         });
     }
 
-    // TODO: channel to be finished
     parseRequset(request: any, socket: socket.Socket) {
         (socket as any).mikudos = {
             provider: 'socketio',

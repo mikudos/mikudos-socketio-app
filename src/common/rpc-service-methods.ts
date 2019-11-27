@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export class ServiceMethods {
+export class RpcServiceMethods {
     hooks: any;
     service: any;
     constructor(hooks: { before: any; after: any; error: any }, service: any) {
