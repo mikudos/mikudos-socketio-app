@@ -204,6 +204,7 @@ export class Application {
         });
     }
 
+    // TODO: channel to be finished
     parseRequset(request: any, socket: socket.Socket) {
         (socket as any).mikudos = {
             provider: 'socketio',
