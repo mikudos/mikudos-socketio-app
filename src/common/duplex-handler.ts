@@ -1,8 +1,6 @@
 import { get, set, unset } from 'lodash';
 import { HandlerBase } from './handler-base';
 
-const JsonRpcError = require('json-rpc-error');
-
 export class DUPLEX_HANDLER extends HandlerBase {
     namespaces: any = {};
     socketStreams: any = {};
