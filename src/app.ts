@@ -18,7 +18,6 @@ export class Application {
     chat_services?: CHAT_HANDLER;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    [key: string]: any;
     constructor(io: socket.Server) {
         this.io = io;
         this.settings = _.merge({}, config);
@@ -133,39 +132,60 @@ export class Application {
             if (this.chat_services) {
                 socket.on(
                     this.chat_services.eventPath,
-                    (data, callback: Function) => {
+                    async (data, callback: Function) => {
                         data.__proto_socket__ = socket;
                         // chat message
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
                             );
-                        let res = this.chat_services.handle(data);
-                        callback(res);
+                        try {
+                            let res = await this.chat_services.handle(
+                                data,
+                                socket
+                            );
+                            callback(res);
+                        } catch (error) {
+                            callback({ error });
+                        }
                     }
                 );
                 socket.on(
                     `join ${this.chat_services.eventPath}`,
-                    (data, callback: Function) => {
+                    async (data, callback: Function) => {
                         data.__proto_socket__ = socket;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
                             );
-                        let res = this.chat_services.join(data);
-                        callback(res);
+                        try {
+                            let res = await this.chat_services.join(
+                                data,
+                                socket
+                            );
+                            callback(res);
+                        } catch (error) {
+                            callback({ error });
+                        }
                     }
                 );
                 socket.on(
                     `leave ${this.chat_services.eventPath}`,
-                    (data, callback: Function) => {
+                    async (data, callback: Function) => {
                         data.__proto_socket__ = socket;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
                             );
-                        let res = this.chat_services.leave(data);
-                        callback(res);
+                        try {
+                            let res = await this.chat_services.leave(
+                                data,
+                                socket
+                            );
+                            callback(res);
+                        } catch (error) {
+                            callback({ error });
+                        }
                     }
                 );
             }
@@ -271,6 +291,7 @@ export class Application {
 
     parseRequset(request: any, socket: socket.Socket) {
         (socket as any).mikudos = {
+            app: this,
             provider: 'socketio',
             headers: socket.handshake.headers,
             remoteAddress: socket.conn.remoteAddress

@@ -6,36 +6,45 @@ export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;
     constructor(
         public app: Application,
-        { eventPath = 'message', roomPath = 'room' } = {}
+        { eventPath = 'message', roomPath = 'room' } = {},
+        public hooks: { [key: string]: Function[] } = {}
     ) {
         super(eventPath);
         this.roomPath = roomPath;
     }
 
     getRoom(data: any) {
-        return data[this.roomPath];
+        return _.get(data, this.roomPath);
     }
 
     getUser(data: any) {
         return _.get(data, '__proto_socket__.request.user');
     }
 
-    handle(data: any) {
+    async handle(data: any, socket: SocketIO.Socket) {
+        const hooks = _.compact(_.concat(this.hooks.all, this.hooks.chat));
+        for await (const hook of hooks) {
+            await hook.call(this, data, socket);
+        }
         let room = this.getRoom(data);
-        if (!this.checkRoom(room, data.__proto_socket__))
+        if (!room)
             return {
                 error: {
-                    message: 'you are not in the corresponding room',
-                    class: 'Wrong Room',
-                    code: 2
+                    message: `${this.roomPath} key must provided`,
+                    class: 'Common Error',
+                    code: 1
                 }
             };
-        // broadcast chat message exclud self
+        // broadcast chat message exclud self or to another socket id
         data.__proto_socket__.to(room).send(_.omit(data, '__proto_socket__'));
         return { result: { successed: true } };
     }
 
-    join(data: any) {
+    async join(data: any, socket: SocketIO.Socket) {
+        const hooks = _.compact(_.concat(this.hooks.all, this.hooks.join));
+        for await (const hook of hooks) {
+            await hook.call(this, data, socket);
+        }
         let room = this.getRoom(data);
         if (!room)
             return {
@@ -64,7 +73,11 @@ export class CHAT_HANDLER extends HandlerBase {
         return { result: { successed: true } };
     }
 
-    leave(data: any) {
+    async leave(data: any, socket: SocketIO.Socket) {
+        const hooks = _.compact(_.concat(this.hooks.all, this.hooks.leave));
+        for await (const hook of hooks) {
+            await hook.call(this, data, socket);
+        }
         let room = this.getRoom(data);
         if (!this.checkRoom(room, data.__proto_socket__))
             return {
