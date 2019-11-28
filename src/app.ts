@@ -16,6 +16,7 @@ export class Application {
     io: socket.Server;
     json_rpc_services?: JSON_RPC_HANDLER;
     chat_services?: CHAT_HANDLER;
+    publishFilter?: (io: socket.Server) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
     constructor(io: socket.Server) {
@@ -88,7 +89,7 @@ export class Application {
                         );
                         response.method = `${namespace}.${method}`;
                         callback(response);
-                        this.publishEvent(response);
+                        this.publishFilter && this.publishEvent(response);
                     }
                 );
             }
@@ -270,22 +271,12 @@ export class Application {
         });
     }
 
-    // TODO: channel to be finished
-    publishEvent(response: any) {
-        // this.io.to('authenticated').emit('rpc-call event', response);
-        console.log('sockets', this.io.sockets.sockets);
-        console.log(
-            'authenticated sockets',
-            this.io.in('authenticated').sockets.sockets
-        );
-        this.io.in('authenticated').clients((error: any, clients: any) => {
-            if (error) throw error;
-            console.log(clients); // => [Anw2LatarvGVVXEIAAAD]
-            (clients as any[])
-                .filter(client => client)
-                .map(clientRoom => {
-                    this.io.to(clientRoom).emit('rpc-call event', response);
-                });
+    // use customized publishFilter
+    async publishEvent(response: any) {
+        if (!this.publishFilter) return;
+        const rooms = await this.publishFilter(this.io);
+        rooms.map(clientRoom => {
+            this.io.to(clientRoom).emit('rpc-call event', response);
         });
     }
 
