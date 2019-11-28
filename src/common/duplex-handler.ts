@@ -1,4 +1,4 @@
-import { get, set, unset } from 'lodash';
+import { get, set, unset, keysIn, forOwn } from 'lodash';
 import socket from 'socket.io';
 import { HandlerBase } from './handler-base';
 import { EventEmitter } from 'events';
@@ -20,6 +20,11 @@ export class DUPLEX_HANDLER extends HandlerBase {
         let event = get(this.socketStreams, socket.id);
         if (!event || !(event instanceof EventEmitter)) {
             event = new EventEmitter();
+            let len = 0;
+            forOwn(this.namespaces, space => {
+                len += keysIn(this.namespaces).length;
+            });
+            event.setMaxListeners(len > 10 ? len : 10);
             set(this.socketStreams, socket.id, event);
         }
         try {
