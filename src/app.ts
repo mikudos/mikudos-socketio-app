@@ -96,7 +96,7 @@ export class Application {
 
             if (this.authentication) {
                 socket.on(
-                    'authentication',
+                    this.authentication.eventPath,
                     async (data: AuthenticationRequest, callback: Function) => {
                         if (!this.authentication)
                             throw new Error(
@@ -123,8 +123,9 @@ export class Application {
                             });
                         }
                         socket.join('authenticated', () => {
-                            let rooms = Object.keys(socket.rooms);
-                            console.log(rooms); // [ <socket.id>, 'room 237' ]
+                            this.authentication &&
+                                this.authentication.authJoinCallback &&
+                                this.authentication.authJoinCallback(socket);
                         });
                     }
                 );

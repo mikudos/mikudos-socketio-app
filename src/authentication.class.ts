@@ -15,6 +15,9 @@ export class Authentication {
         },
         json: true
     };
+    eventPath: string;
+    tokenPath: string;
+    authJoinCallback: (socket: SocketIO.Socket) => void;
     constructor(
         {
             protocol = 'http',
@@ -24,11 +27,18 @@ export class Authentication {
             method,
             headers = {}
         }: any = {},
-        public tokenPath: string = 'accessToken'
+        {
+            tokenPath = 'accessToken',
+            eventPath = 'authentication',
+            authJoinCallback = async (socket: SocketIO.Socket) => {}
+        } = {}
     ) {
+        this.eventPath = eventPath;
+        this.tokenPath = tokenPath;
         this.requsetOption.uri = `${protocol}://${host}:${port}${path}`;
         this.requsetOption.method = method || this.requsetOption.method;
         _.assign(this.requsetOption.headers, headers);
+        this.authJoinCallback = authJoinCallback;
     }
 
     async authenticate(body: AuthenticationRequest) {
