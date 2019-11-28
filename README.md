@@ -9,18 +9,24 @@ Import the mikudos-socketio-server module:
 ```ts
 import {
     Application,
-    ServiceMethods,
+    Authentication,
+    AuthenticationRequest,
+    RpcServiceMethods,
     JSON_RPC_HANDLER,
-    ChatHandler
+    CHAT_HANDLER,
+    DUPLEX_HANDLER
 } from 'mikudos-socketio-server';
 ```
 
 ```js
 var {
     Application,
-    ServiceMethods,
+    Authentication,
+    AuthenticationRequest,
+    RpcServiceMethods,
     JSON_RPC_HANDLER,
-    ChatHandler
+    CHAT_HANDLER,
+    DUPLEX_HANDLER
 } = require('mikudos-socketio-server');
 ```
 
