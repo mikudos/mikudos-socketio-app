@@ -10,7 +10,6 @@ export class AuthenticationRequest {
 export class Authentication {
     requsetOption: any = {
         method: 'POST',
-        uri: 'http://127.0.0.1:3030/authentication',
         headers: {
             'Content-Type': 'application/json'
         },
