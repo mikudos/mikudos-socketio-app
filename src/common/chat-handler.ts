@@ -22,13 +22,7 @@ export class CHAT_HANDLER extends HandlerBase {
 
     handle(data: any) {
         let room = this.getRoom(data);
-        if (Object.keys(data.__proto_socket__.rooms).includes(room)) {
-            // broadcast chat message exclud self
-            data.__proto_socket__
-                .to(room)
-                .send(_.omit(data, '__proto_socket__'));
-            return { result: { successed: true } };
-        } else {
+        if (!this.checkRoom(room, data.__proto_socket__))
             return {
                 error: {
                     message: 'you are not in the corresponding room',
@@ -36,7 +30,9 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 2
                 }
             };
-        }
+        // broadcast chat message exclud self
+        data.__proto_socket__.to(room).send(_.omit(data, '__proto_socket__'));
+        return { result: { successed: true } };
     }
 
     join(data: any) {
@@ -49,7 +45,7 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 1
                 }
             };
-        if (Object.keys(data.__proto_socket__.rooms).includes(room))
+        if (this.checkRoom(room, data.__proto_socket__))
             return {
                 error: {
                     message: `you already in the room: ${room}`,
@@ -70,7 +66,7 @@ export class CHAT_HANDLER extends HandlerBase {
 
     leave(data: any) {
         let room = this.getRoom(data);
-        if (!Object.keys(data.__proto_socket__.rooms).includes(room))
+        if (!this.checkRoom(room, data.__proto_socket__))
             return {
                 error: {
                     message: `you are not in the room: ${room}`,

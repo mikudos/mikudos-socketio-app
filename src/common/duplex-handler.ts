@@ -15,8 +15,17 @@ export class DUPLEX_HANDLER extends HandlerBase {
         namespace: string,
         method: string,
         data: any,
-        socket: socket.Socket
+        socket: socket.Socket,
+        room: string
     ) {
+        if (!this.checkRoom(room, socket))
+            return {
+                error: {
+                    message: 'you are not in the corresponding room',
+                    class: 'Wrong Room',
+                    code: 2
+                }
+            };
         let event = get(this.socketStreams, socket.id);
         if (!event || !(event instanceof EventEmitter)) {
             event = new EventEmitter();
@@ -40,6 +49,10 @@ export class DUPLEX_HANDLER extends HandlerBase {
                         `${this.eventPath} ${namespace}.${method}`,
                         data
                     );
+                    if (!room) return;
+                    socket
+                        .to(room)
+                        .emit(`${this.eventPath} ${namespace}.${method}`, data);
                 }
             );
         } catch (error) {

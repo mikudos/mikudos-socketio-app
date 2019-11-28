@@ -185,7 +185,8 @@ export class Application {
                             namespace,
                             method,
                             data.data,
-                            socket
+                            socket,
+                            data.room
                         );
                         callback(res);
                     }
