@@ -22,6 +22,9 @@
         "url": "https://github.com/mikudos/mikudos-socketio-app/issues"
     },
     "homepage": "https://github.com/mikudos/mikudos-socketio-app#readme",
+    "engines": {
+        "node": "^12.0.0"
+    },
     "dependencies": {
         "config": "^3.2.4",
         "js-yaml": "^3.13.1",
