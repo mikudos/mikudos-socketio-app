@@ -13,20 +13,21 @@ declare namespace mikudos {
 
 export class Application {
     settings: any;
-    io: socket.Server;
+    io: socket.Server | socket.Namespace;
     json_rpc_services?: JSON_RPC_HANDLER;
     chat_services?: CHAT_HANDLER;
-    publishFilter?: (io: socket.Server) => Promise<string[]>;
+    publishFilter?: (io: socket.Server | socket.Namespace) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    constructor(io: socket.Server) {
-        this.io = io;
+    constructor(io: socket.Server, public rootNamespace?: string) {
+        this.io = rootNamespace ? io.of(rootNamespace) : io;
         this.settings = _.merge({}, config);
     }
 
-    bind(io: socket.Server) {
-        this.io = io;
+    bind(io: socket.Server, rootNamespace?: string) {
+        this.io = rootNamespace ? io.of(rootNamespace) : io;
         this.socketInit();
+        this.rootNamespace = rootNamespace;
     }
 
     init() {
