@@ -5,8 +5,9 @@ import { it } from 'mocha';
 import { MikudosSocketIoClient } from 'mikudos-socketio-client';
 
 const port = 3000;
+const rootNamespace = '';
 const io = socket(port);
-const app = new Application(io);
+const app = new Application(io, rootNamespace);
 
 describe('Mikudos socketio application tests', () => {
     it('app implement', async () => {
@@ -14,9 +15,12 @@ describe('Mikudos socketio application tests', () => {
     });
 
     it('connection', async () => {
-        const client = new MikudosSocketIoClient({
-            uri: `ws://localhost:${port}`
-        });
+        const client = new MikudosSocketIoClient(
+            {
+                uri: `ws://localhost:${port}`
+            },
+            { rootNamespace }
+        );
         client.socket.on('connection', () => {
             assert.ok('connected successful');
         });

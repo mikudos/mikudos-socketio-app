@@ -42,7 +42,7 @@
         "@types/mocha": "^5.2.7",
         "@types/socket.io": "^2.1.4",
         "@types/socket.io-client": "^1.4.32",
-        "mikudos-socketio-client": "0.0.6",
+        "mikudos-socketio-client": "0.0.7",
         "mocha": "^6.2.2",
         "shx": "^0.3.2",
         "ts-mocha": "^6.0.0",
