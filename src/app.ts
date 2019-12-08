@@ -141,7 +141,7 @@ export class Application {
                                 this.authentication.authJoinCallback &&
                                 this.authentication.authJoinCallback(
                                     socket,
-                                    this.io
+                                    this
                                 );
                         });
                     }
