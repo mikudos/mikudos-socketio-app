@@ -123,10 +123,19 @@ export class Application {
                                 }
                             });
                         }
+                        let userId = (socket as any).mikudos.user[
+                            this.get('authentication.entityId') || 'id'
+                        ];
+                        if (userId) {
+                            socket.join(userId);
+                        }
                         socket.join('authenticated', () => {
                             this.authentication &&
                                 this.authentication.authJoinCallback &&
-                                this.authentication.authJoinCallback(socket);
+                                this.authentication.authJoinCallback(
+                                    socket,
+                                    this.io
+                                );
                         });
                     }
                 );
