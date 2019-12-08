@@ -279,6 +279,9 @@ export class Application {
     // use customized publishFilter
     async publishEvent(response: any) {
         if (!this.publishFilter) return;
+        (this.io.adapter as any).clients((err: any, clients: any) => {
+            console.log(clients); // an array containing all connected socket ids
+        });
         const rooms = await this.publishFilter(this.io);
         rooms.map(clientRoom => {
             this.io.to(clientRoom).emit('rpc-call event', response);
