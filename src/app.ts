@@ -17,19 +17,32 @@ export class Application {
     io: socket.Namespace;
     json_rpc_services?: JSON_RPC_HANDLER;
     chat_services?: CHAT_HANDLER;
+    rootNamespace?: string;
     publishFilter?: (
         app: Application,
         io: socket.Namespace
     ) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    constructor(public rootIo: socket.Server, public rootNamespace?: string) {
-        rootIo.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
+    constructor(
+        public rootIo: socket.Server,
+        {
+            rootNamespace,
+            redisConfig = { host: 'localhost', port: 6379 }
+        }: { rootNamespace?: string; redisConfig?: any }
+    ) {
+        rootIo.adapter(redisAdapter(redisConfig));
         this.io = rootNamespace ? rootIo.of(rootNamespace) : rootIo.of('/');
         this.settings = _.merge({}, config);
     }
 
-    bind(io: socket.Server, rootNamespace?: string) {
+    bind(
+        io: socket.Server,
+        {
+            rootNamespace,
+            redisConfig = { host: 'localhost', port: 6379 }
+        }: { rootNamespace?: string; redisConfig?: any }
+    ) {
         this.rootIo = io;
         io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
         this.io = rootNamespace ? io.of(rootNamespace) : io.of('/');
