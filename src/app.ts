@@ -1,5 +1,6 @@
 import config from 'config';
 import socket from 'socket.io';
+import redisAdapter from 'socket.io-redis';
 import _ from 'lodash';
 import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
@@ -20,11 +21,13 @@ export class Application {
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
     constructor(io: socket.Server, public rootNamespace?: string) {
+        io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
         this.io = rootNamespace ? io.of(rootNamespace) : io;
         this.settings = _.merge({}, config);
     }
 
     bind(io: socket.Server, rootNamespace?: string) {
+        io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
         this.io = rootNamespace ? io.of(rootNamespace) : io;
         this.socketInit();
         this.rootNamespace = rootNamespace;
