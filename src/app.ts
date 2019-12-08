@@ -14,21 +14,25 @@ declare namespace mikudos {
 
 export class Application {
     settings: any;
-    io: socket.Server | socket.Namespace;
+    io: socket.Namespace;
     json_rpc_services?: JSON_RPC_HANDLER;
     chat_services?: CHAT_HANDLER;
-    publishFilter?: (io: socket.Server | socket.Namespace) => Promise<string[]>;
+    publishFilter?: (
+        app: Application,
+        io: socket.Namespace
+    ) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    constructor(io: socket.Server, public rootNamespace?: string) {
-        io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
-        this.io = rootNamespace ? io.of(rootNamespace) : io;
+    constructor(public rootIo: socket.Server, public rootNamespace?: string) {
+        rootIo.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
+        this.io = rootNamespace ? rootIo.of(rootNamespace) : rootIo.of('/');
         this.settings = _.merge({}, config);
     }
 
     bind(io: socket.Server, rootNamespace?: string) {
+        this.rootIo = io;
         io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
-        this.io = rootNamespace ? io.of(rootNamespace) : io;
+        this.io = rootNamespace ? io.of(rootNamespace) : io.of('/');
         this.socketInit();
         this.rootNamespace = rootNamespace;
     }
@@ -126,10 +130,19 @@ export class Application {
                                 }
                             });
                         }
+                        let userId = (socket as any).mikudos.user[
+                            this.get('authentication.entityId') || 'id'
+                        ];
+                        if (userId) {
+                            socket.join(userId);
+                        }
                         socket.join('authenticated', () => {
                             this.authentication &&
                                 this.authentication.authJoinCallback &&
-                                this.authentication.authJoinCallback(socket);
+                                this.authentication.authJoinCallback(
+                                    socket,
+                                    this.io
+                                );
                         });
                     }
                 );
@@ -140,6 +153,7 @@ export class Application {
                     this.chat_services.eventPath,
                     async (data, callback: Function) => {
                         data.__proto_socket__ = socket;
+                        data.__proto_app__ = this;
                         // chat message
                         if (!this.chat_services)
                             throw new Error(
@@ -160,6 +174,7 @@ export class Application {
                     `join ${this.chat_services.eventPath}`,
                     async (data, callback: Function) => {
                         data.__proto_socket__ = socket;
+                        data.__proto_app__ = this;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
@@ -179,6 +194,7 @@ export class Application {
                     `leave ${this.chat_services.eventPath}`,
                     async (data, callback: Function) => {
                         data.__proto_socket__ = socket;
+                        data.__proto_app__ = this;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
@@ -279,10 +295,7 @@ export class Application {
     // use customized publishFilter
     async publishEvent(response: any) {
         if (!this.publishFilter) return;
-        (this.io.adapter as any).clients((err: any, clients: any) => {
-            console.log(clients); // an array containing all connected socket ids
-        });
-        const rooms = await this.publishFilter(this.io);
+        const rooms = await this.publishFilter(this, this.io);
         rooms.map(clientRoom => {
             this.io.to(clientRoom).emit('rpc-call event', response);
         });
@@ -300,5 +313,68 @@ export class Application {
         // if request is jsonrpc request then parse the request
         request[1] = _.pick(request[1], ['jsonrpc', 'id', 'method', 'params']);
         request[1].socket = socket;
+    }
+
+    /**
+     * Join the remote Room
+     * @param socketId
+     * @param room
+     */
+    async remoteJoin(socketId: string, room: string) {
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).remoteJoin(socketId, room, (err: any) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Leave the remote room
+     * @param socketId
+     * @param room
+     */
+    async remoteLeave(socketId: string, room: string) {
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).remoteLeave(socketId, room, (err: any) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+
+    async clientRooms(socketId: string) {
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).clientRooms(
+                socketId,
+                (err: any, rooms: string[]) => {
+                    if (err) reject(err);
+                    resolve(rooms); // return an array containing every room socketId has joined.
+                }
+            );
+        });
+    }
+
+    async allRooms() {
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).allRooms((err: any, rooms: string[]) => {
+                if (err || !rooms)
+                    reject(err || Error('get no rooms, remote error'));
+                resolve(rooms);
+            });
+        });
+    }
+
+    async remoteDisconnect(socketId: String, close: Boolean = true) {
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).remoteDisconnect(
+                socketId,
+                close,
+                (err: any) => {
+                    if (err) reject(err);
+                    resolve();
+                }
+            );
+        });
     }
 }

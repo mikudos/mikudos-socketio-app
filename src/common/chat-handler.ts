@@ -36,7 +36,9 @@ export class CHAT_HANDLER extends HandlerBase {
                 }
             };
         // broadcast chat message exclud self or to another socket id
-        data.__proto_socket__.to(room).send(_.omit(data, '__proto_socket__'));
+        (data.__proto_socket__ as SocketIO.Socket)
+            .to(room)
+            .emit(this.eventPath, _.omit(data, '__proto_socket__'));
         return { result: { successed: true } };
     }
 
@@ -63,6 +65,10 @@ export class CHAT_HANDLER extends HandlerBase {
                 }
             };
         let user = this.getUser(data);
+        await (data.__proto_app__ as Application).remoteJoin(
+            data.__proto_socket__.id,
+            room
+        );
         data.__proto_socket__.join(room, () => {
             data.__proto_socket__.to(room).emit(`join ${this.eventPath}`, {
                 room,
@@ -93,6 +99,10 @@ export class CHAT_HANDLER extends HandlerBase {
             user,
             socket_id: data.__proto_socket__.id
         });
+        await (data.__proto_app__ as Application).remoteLeave(
+            data.__proto_socket__.id,
+            room
+        );
         data.__proto_socket__.leave(room);
         return { result: { successed: true } };
     }

@@ -17,7 +17,10 @@ export class Authentication {
     };
     eventPath: string;
     tokenPath: string;
-    authJoinCallback: (socket: SocketIO.Socket) => void;
+    authJoinCallback: (
+        socket: SocketIO.Socket,
+        nps?: SocketIO.Namespace
+    ) => void;
     constructor(
         {
             protocol = 'http',
@@ -30,7 +33,10 @@ export class Authentication {
         {
             tokenPath = 'accessToken',
             eventPath = 'authentication',
-            authJoinCallback = async (socket: SocketIO.Socket) => {}
+            authJoinCallback = async (
+                socket: SocketIO.Socket,
+                nps?: SocketIO.Namespace
+            ) => {}
         } = {}
     ) {
         this.eventPath = eventPath;
