@@ -7,7 +7,7 @@ import { MikudosSocketIoClient } from 'mikudos-socketio-client';
 const port = 3000;
 const rootNamespace = '';
 const io = socket(port);
-const app = new Application(io, rootNamespace);
+const app = new Application(io, { rootNamespace });
 
 describe('Mikudos socketio application tests', () => {
     it('app implement', async () => {
