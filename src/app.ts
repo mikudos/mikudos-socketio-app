@@ -10,6 +10,16 @@ declare namespace mikudos {
     interface ConfigFunc {
         (app: Application): void;
     }
+
+    export interface Socket extends SocketIO.Socket {
+        mikudos: {
+            app: Application;
+            provider: string;
+            headers: any;
+            remoteAddress: any;
+            user: any;
+        };
+    }
 }
 
 export class Application {
@@ -28,26 +38,19 @@ export class Application {
         public rootIo: socket.Server,
         {
             rootNamespace,
-            redisConfig = { host: 'localhost', port: 6379 }
-        }: { rootNamespace?: string; redisConfig?: any }
+            redisConfig
+        }: {
+            rootNamespace?: string;
+            redisConfig?: { host: string; port: number };
+        }
     ) {
-        rootIo.adapter(redisAdapter(redisConfig));
+        if (redisConfig) {
+            this.enable('redisAdaptered');
+            rootIo.adapter(redisAdapter(redisConfig));
+        }
+        this.rootNamespace = rootNamespace;
         this.io = rootNamespace ? rootIo.of(rootNamespace) : rootIo.of('/');
         this.settings = _.merge({}, config);
-    }
-
-    bind(
-        io: socket.Server,
-        {
-            rootNamespace,
-            redisConfig = { host: 'localhost', port: 6379 }
-        }: { rootNamespace?: string; redisConfig?: any }
-    ) {
-        this.rootIo = io;
-        io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));
-        this.io = rootNamespace ? io.of(rootNamespace) : io.of('/');
-        this.socketInit();
-        this.rootNamespace = rootNamespace;
     }
 
     init() {
@@ -334,6 +337,7 @@ export class Application {
      * @param room
      */
     async remoteJoin(socketId: string, room: string) {
+        if (!this.enabled('redisAdaptered')) return;
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).remoteJoin(socketId, room, (err: any) => {
                 if (err) reject(err);
@@ -348,6 +352,7 @@ export class Application {
      * @param room
      */
     async remoteLeave(socketId: string, room: string) {
+        if (!this.enabled('redisAdaptered')) return;
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).remoteLeave(socketId, room, (err: any) => {
                 if (err) reject(err);
@@ -357,6 +362,7 @@ export class Application {
     }
 
     async clientRooms(socketId: string) {
+        if (!this.enabled('redisAdaptered')) return;
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).clientRooms(
                 socketId,
@@ -369,6 +375,7 @@ export class Application {
     }
 
     async allRooms() {
+        if (!this.enabled('redisAdaptered')) return;
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).allRooms((err: any, rooms: string[]) => {
                 if (err || !rooms)
@@ -379,6 +386,7 @@ export class Application {
     }
 
     async remoteDisconnect(socketId: String, close: Boolean = true) {
+        if (!this.enabled('redisAdaptered')) return;
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).remoteDisconnect(
                 socketId,

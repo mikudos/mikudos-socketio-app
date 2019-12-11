@@ -65,10 +65,12 @@ export class CHAT_HANDLER extends HandlerBase {
                 }
             };
         let user = this.getUser(data);
-        await (data.__proto_app__ as Application).remoteJoin(
-            data.__proto_socket__.id,
-            room
-        );
+        if (this.app.enabled('redisAdaptered')) {
+            await (data.__proto_app__ as Application).remoteJoin(
+                data.__proto_socket__.id,
+                room
+            );
+        }
         data.__proto_socket__.join(room, () => {
             data.__proto_socket__.to(room).emit(`join ${this.eventPath}`, {
                 room,
@@ -99,10 +101,12 @@ export class CHAT_HANDLER extends HandlerBase {
             user,
             socket_id: data.__proto_socket__.id
         });
-        await (data.__proto_app__ as Application).remoteLeave(
-            data.__proto_socket__.id,
-            room
-        );
+        if (this.app.enabled('redisAdaptered')) {
+            await (data.__proto_app__ as Application).remoteLeave(
+                data.__proto_socket__.id,
+                room
+            );
+        }
         data.__proto_socket__.leave(room);
         return { result: { successed: true } };
     }
