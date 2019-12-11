@@ -1,6 +1,6 @@
 import config from 'config';
 import socket from 'socket.io';
-import redisAdapter from 'socket.io-redis';
+const redisAdapter = require('socket.io-redis');
 import _ from 'lodash';
 import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
@@ -44,13 +44,13 @@ export class Application {
             redisConfig?: { host: string; port: number };
         } = {}
     ) {
+        this.settings = _.merge({}, config);
         if (redisConfig) {
             this.enable('redisAdaptered');
             rootIo.adapter(redisAdapter(redisConfig));
         }
         this.rootNamespace = rootNamespace;
         this.io = rootNamespace ? rootIo.of(rootNamespace) : rootIo.of('/');
-        this.settings = _.merge({}, config);
     }
 
     init() {
