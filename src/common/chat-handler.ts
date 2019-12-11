@@ -38,7 +38,10 @@ export class CHAT_HANDLER extends HandlerBase {
         // broadcast chat message exclud self or to another socket id
         (data.__proto_socket__ as SocketIO.Socket)
             .to(room)
-            .emit(this.eventPath, _.omit(data, '__proto_socket__'));
+            .emit(
+                this.eventPath,
+                _.omit(data, '__proto_socket__', '__proto_app__')
+            );
         return { result: { successed: true } };
     }
 
