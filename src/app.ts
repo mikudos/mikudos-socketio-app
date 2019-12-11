@@ -42,7 +42,7 @@ export class Application {
         }: {
             rootNamespace?: string;
             redisConfig?: { host: string; port: number };
-        }
+        } = {}
     ) {
         if (redisConfig) {
             this.enable('redisAdaptered');
