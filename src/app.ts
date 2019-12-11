@@ -6,12 +6,12 @@ import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
 import { CHAT_HANDLER, DUPLEX_HANDLER } from './common';
 
-declare namespace mikudos {
+export declare namespace mikudos {
     interface ConfigFunc {
         (app: Application): void;
     }
 
-    export interface Socket extends SocketIO.Socket {
+    interface Socket extends SocketIO.Socket {
         mikudos: {
             app: Application;
             provider: string;
@@ -91,7 +91,7 @@ export class Application {
     }
 
     socketInit() {
-        this.io.on('connection', (socket: socket.Socket) => {
+        this.io.on('connection', (socket: mikudos.Socket) => {
             socket.use((reqData: any, next) => {
                 this.parseRequset(reqData, socket);
                 next();
@@ -168,8 +168,6 @@ export class Application {
                 socket.on(
                     this.chat_services.eventPath,
                     async (data, callback: Function) => {
-                        data.__proto_socket__ = socket;
-                        data.__proto_app__ = this;
                         // chat message
                         if (!this.chat_services)
                             throw new Error(
@@ -189,8 +187,6 @@ export class Application {
                 socket.on(
                     `join ${this.chat_services.eventPath}`,
                     async (data, callback: Function) => {
-                        data.__proto_socket__ = socket;
-                        data.__proto_app__ = this;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
@@ -209,8 +205,6 @@ export class Application {
                 socket.on(
                     `leave ${this.chat_services.eventPath}`,
                     async (data, callback: Function) => {
-                        data.__proto_socket__ = socket;
-                        data.__proto_app__ = this;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'

@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { HandlerBase } from './handler-base';
-import { Application } from '../app';
-
+import { Application, mikudos } from '../app';
 export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;
     constructor(
@@ -17,8 +16,8 @@ export class CHAT_HANDLER extends HandlerBase {
         return _.get(data, this.roomPath);
     }
 
-    getUser(data: any) {
-        return _.get(data, '__proto_socket__.request.user');
+    getUser(socket: mikudos.Socket) {
+        return socket.mikudos.user;
     }
 
     async handle(data: any, socket: SocketIO.Socket) {
@@ -36,16 +35,11 @@ export class CHAT_HANDLER extends HandlerBase {
                 }
             };
         // broadcast chat message exclud self or to another socket id
-        (data.__proto_socket__ as SocketIO.Socket)
-            .to(room)
-            .emit(
-                this.eventPath,
-                _.omit(data, '__proto_socket__', '__proto_app__')
-            );
+        (socket as SocketIO.Socket).to(room).emit(this.eventPath, data);
         return { result: { successed: true } };
     }
 
-    async join(data: any, socket: SocketIO.Socket) {
+    async join(data: any, socket: mikudos.Socket) {
         const hooks = _.compact(_.concat(this.hooks.all, this.hooks.join));
         for await (const hook of hooks) {
             await hook.call(this, data, socket);
@@ -59,7 +53,7 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 1
                 }
             };
-        if (this.checkRoom(room, data.__proto_socket__))
+        if (this.checkRoom(room, socket))
             return {
                 error: {
                     message: `you already in the room: ${room}`,
@@ -67,30 +61,27 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 1
                 }
             };
-        let user = this.getUser(data);
+        let user = this.getUser(socket);
         if (this.app.enabled('redisAdaptered')) {
-            await (data.__proto_app__ as Application).remoteJoin(
-                data.__proto_socket__.id,
-                room
-            );
+            await socket.mikudos.app.remoteJoin(socket.id, room);
         }
-        data.__proto_socket__.join(room, () => {
-            data.__proto_socket__.to(room).emit(`join ${this.eventPath}`, {
+        socket.join(room, () => {
+            socket.to(room).emit(`join ${this.eventPath}`, {
                 room,
                 user,
-                socket_id: data.__proto_socket__.id
+                socket_id: socket.id
             });
         });
         return { result: { successed: true } };
     }
 
-    async leave(data: any, socket: SocketIO.Socket) {
+    async leave(data: any, socket: mikudos.Socket) {
         const hooks = _.compact(_.concat(this.hooks.all, this.hooks.leave));
         for await (const hook of hooks) {
             await hook.call(this, data, socket);
         }
         let room = this.getRoom(data);
-        if (!this.checkRoom(room, data.__proto_socket__))
+        if (!this.checkRoom(room, socket))
             return {
                 error: {
                     message: `you are not in the room: ${room}`,
@@ -98,19 +89,16 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 2
                 }
             };
-        let user = this.getUser(data);
-        data.__proto_socket__.to(room).emit(`leave ${this.eventPath}`, {
+        let user = this.getUser(socket);
+        socket.to(room).emit(`leave ${this.eventPath}`, {
             room,
             user,
-            socket_id: data.__proto_socket__.id
+            socket_id: socket.id
         });
         if (this.app.enabled('redisAdaptered')) {
-            await (data.__proto_app__ as Application).remoteLeave(
-                data.__proto_socket__.id,
-                room
-            );
+            await socket.mikudos.app.remoteLeave(socket.id, room);
         }
-        data.__proto_socket__.leave(room);
+        socket.leave(room);
         return { result: { successed: true } };
     }
 }
