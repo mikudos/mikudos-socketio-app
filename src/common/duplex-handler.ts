@@ -106,8 +106,10 @@ export class DUPLEX_HANDLER extends HandlerBase {
 
     cancelAllOnSocket(id: string) {
         let event = this.socketStreams[id];
-        event.removeAllListeners();
-        unset(this.socketStreams, id);
+        if (event) {
+            event.removeAllListeners();
+            unset(this.socketStreams, id);
+        }
         return { result: { successed: true } };
     }
 }
