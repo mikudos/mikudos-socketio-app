@@ -53,7 +53,7 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 1
                 }
             };
-        if (this.checkRoom(room, socket))
+        if (await this.checkRoom(room, socket))
             return {
                 error: {
                     message: `you already in the room: ${room}`,
@@ -81,7 +81,7 @@ export class CHAT_HANDLER extends HandlerBase {
             await hook.call(this, data, socket);
         }
         let room = this.getRoom(data);
-        if (!this.checkRoom(room, socket))
+        if (!(await this.checkRoom(room, socket)))
             return {
                 error: {
                     message: `you are not in the room: ${room}`,

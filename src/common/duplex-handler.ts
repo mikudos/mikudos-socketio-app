@@ -1,12 +1,16 @@
 import { get, set, unset, keysIn, forOwn } from 'lodash';
 import { HandlerBase } from './handler-base';
 import { EventEmitter } from 'events';
-import { mikudos } from '../app';
+import { mikudos, Application } from '../app';
 
 export class DUPLEX_HANDLER extends HandlerBase {
     namespaces: any = {};
     socketStreams: { [key: string]: EventEmitter } = {};
-    constructor(namespaces: object, { eventPath = 'stream-call' } = {}) {
+    constructor(
+        public app: Application,
+        namespaces: object,
+        { eventPath = 'stream-call' } = {}
+    ) {
         super(eventPath);
         this.namespaces = namespaces;
     }
@@ -16,16 +20,18 @@ export class DUPLEX_HANDLER extends HandlerBase {
         method: string,
         data: any,
         socket: mikudos.Socket,
-        room: string
+        room?: string
     ) {
-        if (!this.checkRoom(room, socket))
-            return {
-                error: {
-                    message: 'you are not in the corresponding room',
-                    class: 'Wrong Room',
-                    code: 2
-                }
-            };
+        if (room) {
+            if (!(await this.checkRoom(room, socket)))
+                return {
+                    error: {
+                        message: 'you are not in the corresponding room',
+                        class: 'Wrong Room',
+                        code: 2
+                    }
+                };
+        }
         let event = get(this.socketStreams, socket.id);
         if (!event || !(event instanceof EventEmitter)) {
             event = new EventEmitter();

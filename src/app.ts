@@ -232,7 +232,7 @@ export class Application {
                         );
                         if (!this.duplex_services)
                             throw new Error(
-                                'Chat service must be registered first'
+                                'Duplex service must be registered first'
                             );
                         let res = await this.duplex_services.handle(
                             namespace,
@@ -288,8 +288,6 @@ export class Application {
                 /* … */
             });
             socket.once('disconnect', () => {
-                console.log('TCL: client disconnect');
-                console.log('rooms', socket.rooms);
                 socket.leaveAll();
                 if (this.duplex_services) {
                     this.duplex_services.cancelAllOnSocket(socket.id);
@@ -357,17 +355,20 @@ export class Application {
         });
     }
 
-    async clientRooms(socketId: string) {
-        if (!this.enabled('redisAdaptered')) return;
-        await new Promise((resolve, reject) => {
-            (this.io.adapter as any).clientRooms(
-                socketId,
-                (err: any, rooms: string[]) => {
-                    if (err) reject(err);
-                    resolve(rooms); // return an array containing every room socketId has joined.
-                }
-            );
-        });
+    async clientRooms(socket: mikudos.Socket): Promise<string[]> {
+        if (this.enabled('redisAdaptered')) {
+            return await new Promise((resolve, reject) => {
+                (this.io.adapter as any).clientRooms(
+                    socket.id,
+                    (err: any, rooms: string[]) => {
+                        if (err) reject(err);
+                        resolve(rooms); // return an array containing every room socketId has joined.
+                    }
+                );
+            });
+        } else {
+            return Object.keys(socket.rooms);
+        }
     }
 
     async allRooms() {

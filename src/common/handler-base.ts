@@ -3,7 +3,7 @@ import { mikudos } from '../app';
 export class HandlerBase {
     constructor(public eventPath: string) {}
 
-    checkRoom(room: string, socket: mikudos.Socket): boolean {
-        return Object.keys(socket.rooms).includes(room);
+    async checkRoom(room: string, socket: mikudos.Socket): Promise<boolean> {
+        return (await socket.mikudos.app.clientRooms(socket)).includes(room);
     }
 }
