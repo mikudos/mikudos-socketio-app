@@ -268,10 +268,6 @@ export class Application {
                 );
             }
 
-            socket.on('event', data => {
-                console.log('TCL: data', data);
-                /* … */
-            });
             socket.once('disconnect', () => {
                 socket.leaveAll();
                 if (this.duplex_services) {
