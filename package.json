@@ -1,6 +1,6 @@
 {
     "name": "mikudos-socketio-app",
-    "version": "0.0.26",
+    "version": "0.0.27",
     "description": "mikudos-socketio-app for connection and call methods and sync events on mikudos-socketio-app server, which is provided only for socket.io connection.",
     "main": "lib/index.js",
     "scripts": {

@@ -43,30 +43,30 @@ export class Application {
     }
 
     get(name: string) {
-        return this.settings[name];
+        return _.get(this.settings, name);
     }
 
     set(name: string, value: any) {
-        this.settings[name] = value;
+        _.set(this.settings, name, value);
         return this;
     }
 
     disable(name: string) {
-        this.settings[name] = false;
+        _.set(this.settings, name, false);
         return this;
     }
 
     disabled(name: string) {
-        return !this.settings[name];
+        return !_.get(this.settings, name);
     }
 
     enable(name: string) {
-        this.settings[name] = true;
+        _.set(this.settings, name, true);
         return this;
     }
 
     enabled(name: string) {
-        return !!this.settings[name];
+        return !!_.get(this.settings, name);
     }
 
     configure(fn: mikudos.ConfigFunc): Application {
