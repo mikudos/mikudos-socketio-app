@@ -1,6 +1,6 @@
 import rp from 'request-promise-native';
 import _ from 'lodash';
-import { Application } from './app';
+import { Application, mikudos } from './app';
 
 export class AuthenticationRequest {
     strategy?: string;
@@ -17,7 +17,7 @@ export class Authentication {
     };
     eventPath: string;
     tokenPath: string;
-    authJoinCallback: (socket: SocketIO.Socket, app?: Application) => void;
+    authJoinCallback: (socket: mikudos.Socket, app?: Application) => void;
     constructor(
         {
             protocol = 'http',
@@ -31,7 +31,7 @@ export class Authentication {
             tokenPath = 'accessToken',
             eventPath = 'authentication',
             authJoinCallback = async (
-                socket: SocketIO.Socket,
+                socket: mikudos.Socket,
                 app?: Application
             ) => {}
         } = {}

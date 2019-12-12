@@ -135,7 +135,7 @@ export class Application {
                                     `Can not find Token at path: ${Auth.tokenPath}`
                                 );
                             socket.handshake.headers.authentication = token;
-                            (socket as any).mikudos.user = authResult.user;
+                            socket.mikudos.user = authResult.user;
                             callback(authResult);
                         } catch (error) {
                             callback({
@@ -146,9 +146,10 @@ export class Application {
                                 }
                             });
                         }
-                        let userId = (socket as any).mikudos.user[
-                            this.get('authentication.entityId') || 'id'
-                        ];
+                        let userId =
+                            socket.mikudos.user[
+                                this.get('authentication.entityId') || 'id'
+                            ];
                         if (userId) {
                             socket.join(userId);
                         }
@@ -311,12 +312,13 @@ export class Application {
         });
     }
 
-    parseRequset(request: any, socket: socket.Socket) {
-        (socket as any).mikudos = {
+    parseRequset(request: any, socket: mikudos.Socket) {
+        socket.mikudos = {
             app: this,
             provider: 'socketio',
             headers: socket.handshake.headers,
-            remoteAddress: socket.conn.remoteAddress
+            remoteAddress: socket.conn.remoteAddress,
+            user: null
         };
         if (request.length === 1) return;
         if (!request[1].jsonrpc) return;

@@ -1,7 +1,7 @@
 import { get, set, unset, keysIn, forOwn } from 'lodash';
-import socket from 'socket.io';
 import { HandlerBase } from './handler-base';
 import { EventEmitter } from 'events';
+import { mikudos } from '../app';
 
 export class DUPLEX_HANDLER extends HandlerBase {
     namespaces: any = {};
@@ -15,7 +15,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         namespace: string,
         method: string,
         data: any,
-        socket: socket.Socket,
+        socket: mikudos.Socket,
         room: string
     ) {
         if (!this.checkRoom(room, socket))
@@ -83,7 +83,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         });
     }
 
-    async cancel(namespace: string, method: string, socket: SocketIO.Socket) {
+    async cancel(namespace: string, method: string, socket: mikudos.Socket) {
         let event = get(this.socketStreams, socket.id);
         if (!event)
             return {

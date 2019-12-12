@@ -20,7 +20,7 @@ export class CHAT_HANDLER extends HandlerBase {
         return socket.mikudos.user;
     }
 
-    async handle(data: any, socket: SocketIO.Socket) {
+    async handle(data: any, socket: mikudos.Socket) {
         const hooks = _.compact(_.concat(this.hooks.all, this.hooks.chat));
         for await (const hook of hooks) {
             await hook.call(this, data, socket);
@@ -35,7 +35,7 @@ export class CHAT_HANDLER extends HandlerBase {
                 }
             };
         // broadcast chat message exclud self or to another socket id
-        (socket as SocketIO.Socket).to(room).emit(this.eventPath, data);
+        socket.to(room).emit(this.eventPath, data);
         return { result: { successed: true } };
     }
 
