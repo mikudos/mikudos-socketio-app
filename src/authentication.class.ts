@@ -20,14 +20,14 @@ export class Authentication {
     tokenPath: string;
     authJoinCallback: (socket: mikudos.Socket, app?: Application) => void;
     constructor(
-        {
-            protocol = 'http',
-            host = '127.0.0.1',
-            port = '80',
-            path = '/authentication',
-            method,
-            headers = {}
-        }: any = {},
+        { protocol, host, port, path, method, headers }: any = {
+            protocol: 'http',
+            host: '127.0.0.1',
+            port: 80,
+            path: '/authentication',
+            method: 'POST',
+            headers: {}
+        },
         {
             tokenPath = 'accessToken',
             eventPath = 'authentication',
