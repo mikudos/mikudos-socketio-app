@@ -5,22 +5,7 @@ import _ from 'lodash';
 import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
 import { CHAT_HANDLER, DUPLEX_HANDLER } from './common';
-
-export declare namespace mikudos {
-    interface ConfigFunc {
-        (app: Application): void;
-    }
-
-    interface Socket extends SocketIO.Socket {
-        mikudos: {
-            app: Application;
-            provider: string;
-            headers: any;
-            remoteAddress: any;
-            user: any;
-        };
-    }
-}
+import { mikudos } from './namespace';
 
 export class Application {
     settings: any;

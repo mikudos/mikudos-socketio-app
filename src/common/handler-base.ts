@@ -1,4 +1,4 @@
-import { mikudos } from '../app';
+import { mikudos } from '../namespace';
 
 export class HandlerBase {
     constructor(public eventPath: string) {}

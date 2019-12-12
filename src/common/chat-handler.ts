@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { HandlerBase } from './handler-base';
-import { Application, mikudos } from '../app';
+import { Application } from '../app';
+import { mikudos } from '../namespace';
 export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;
     constructor(

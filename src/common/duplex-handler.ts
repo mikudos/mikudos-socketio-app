@@ -1,14 +1,15 @@
 import { get, set, unset, keysIn, forOwn } from 'lodash';
 import { HandlerBase } from './handler-base';
 import { EventEmitter } from 'events';
-import { mikudos, Application } from '../app';
+import { Application } from '../app';
+import { mikudos } from '../namespace';
 
 export class DUPLEX_HANDLER extends HandlerBase {
-    namespaces: any = {};
+    namespaces: { [key: string]: mikudos.DuplexService } = {};
     socketStreams: { [key: string]: EventEmitter } = {};
     constructor(
         public app: Application,
-        namespaces: object,
+        namespaces: { [key: string]: mikudos.DuplexService },
         { eventPath = 'stream-call' } = {}
     ) {
         super(eventPath);
@@ -43,11 +44,21 @@ export class DUPLEX_HANDLER extends HandlerBase {
             set(this.socketStreams, socket.id, event);
         }
         try {
-            let before = this.namespaces[namespace].before || [];
+            if (!this.namespaces[namespace].service[method]) {
+                return { error: { message: "method dosn't exist" } };
+            }
+            let before = (this.namespaces[namespace].before.all || []).concat(
+                this.namespaces[namespace].before[method] || []
+            );
             for await (const fn of before) {
                 data = (await fn(namespace, method, data, socket)) || data;
             }
-            this.namespaces[namespace].handle(namespace, method, data, event);
+            await this.namespaces[namespace].service[method](
+                `${namespace}.${method}`,
+                data,
+                event
+            );
+
             this.socketStreams[socket.id].on(
                 `${namespace}.${method}`,
                 (data: any) => {

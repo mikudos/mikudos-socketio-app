@@ -1,6 +1,7 @@
 import rp from 'request-promise-native';
 import _ from 'lodash';
-import { Application, mikudos } from './app';
+import { Application } from './app';
+import { mikudos } from './namespace';
 
 export class AuthenticationRequest {
     strategy?: string;

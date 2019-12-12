@@ -1,4 +1,5 @@
-export { Application, mikudos } from './app';
+export { Application } from './app';
+export { mikudos } from './namespace';
 export { Authentication, AuthenticationRequest } from './authentication.class';
 export {
     RpcServiceMethods,
