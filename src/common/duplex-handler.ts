@@ -51,7 +51,8 @@ export class DUPLEX_HANDLER extends HandlerBase {
                 this.namespaces[namespace].before[method] || []
             );
             for await (const fn of before) {
-                data = (await fn(namespace, method, data, socket)) || data;
+                data =
+                    (await fn(`${namespace}.${method}`, data, socket)) || data;
             }
             await this.namespaces[namespace].service[method](
                 `${namespace}.${method}`,

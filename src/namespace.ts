@@ -19,4 +19,10 @@ export declare namespace mikudos {
         service: { [key: string]: Function };
         before: { [key: string]: Function[] };
     }
+
+    interface DuplexHandle {
+        (eventName: string, data: any, socket: mikudos.Socket): Promise<
+            void
+        > | void;
+    }
 }
