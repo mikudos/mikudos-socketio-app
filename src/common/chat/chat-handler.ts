@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import { HandlerBase } from './handler-base';
-import { Application } from '../app';
+import { HandlerBase } from '../handler-base';
+import { Application } from '../../app';
 
 export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;

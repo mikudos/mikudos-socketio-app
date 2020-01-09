@@ -1,4 +1,4 @@
-import { HandlerBase } from './handler-base';
+import { HandlerBase } from '../handler-base';
 
 const JsonRpcError = require('json-rpc-error');
 

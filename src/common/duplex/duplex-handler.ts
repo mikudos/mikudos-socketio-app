@@ -1,6 +1,6 @@
 import { get, set, unset, keysIn, forOwn } from 'lodash';
 import socket from 'socket.io';
-import { HandlerBase } from './handler-base';
+import { HandlerBase } from '../handler-base';
 import { EventEmitter } from 'events';
 
 export class DUPLEX_HANDLER extends HandlerBase {

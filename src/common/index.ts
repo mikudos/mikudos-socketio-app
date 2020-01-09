@@ -1,4 +1,3 @@
-export * from './json-rpc-handler';
-export * from './chat-handler';
-export * from './rpc-service-methods';
-export * from './duplex-handler';
+export * from './json-rpc';
+export * from './chat';
+export * from './duplex';

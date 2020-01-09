@@ -1,10 +1,10 @@
 import config from 'config';
 import socket from 'socket.io';
 import _ from 'lodash';
-import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
+import { JSON_RPC_HANDLER } from './common/json-rpc/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
 import { CHAT_HANDLER, DUPLEX_HANDLER } from './common';
-import { MESSAGE_PUSHER } from './common/message-pusher';
+import { PUSHER_HANDLER } from './common/pusher/pusher';
 
 declare namespace mikudos {
     interface ConfigFunc {
@@ -20,7 +20,7 @@ export class Application {
     publishFilter?: (io: socket.Server | socket.Namespace) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    message_pusher?: MESSAGE_PUSHER;
+    message_pusher?: PUSHER_HANDLER;
     constructor(io: socket.Server, public rootNamespace?: string) {
         this.io = rootNamespace ? io.of(rootNamespace) : io;
         this.settings = _.merge({}, config);
