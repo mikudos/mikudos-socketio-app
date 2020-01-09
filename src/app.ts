@@ -20,7 +20,7 @@ export class Application {
     publishFilter?: (io: socket.Server | socket.Namespace) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    message_pusher?: PUSHER_HANDLER;
+    pusher?: PUSHER_HANDLER;
     constructor(io: socket.Server, public rootNamespace?: string) {
         this.io = rootNamespace ? io.of(rootNamespace) : io;
         this.settings = _.merge({}, config);
@@ -264,7 +264,22 @@ export class Application {
                 );
             }
 
-            if (this.message_pusher) {
+            if (this.pusher) {
+                socket.on('', async (data, callback: Function) => {
+                    const [namespace, method] = String(data.method).split('.');
+                    if (!this.pusher)
+                        throw new Error(
+                            'pusher service must be registered first'
+                        );
+                    // let res = await this.pusher.handle(
+                    //     namespace,
+                    //     method,
+                    //     data.data,
+                    //     socket,
+                    //     data.room
+                    // );
+                    // callback(res);
+                });
             }
 
             socket.on('event', data => {
