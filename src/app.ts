@@ -265,21 +265,7 @@ export class Application {
             }
 
             if (this.pusher) {
-                socket.on('', async (data, callback: Function) => {
-                    const [namespace, method] = String(data.method).split('.');
-                    if (!this.pusher)
-                        throw new Error(
-                            'pusher service must be registered first'
-                        );
-                    // let res = await this.pusher.handle(
-                    //     namespace,
-                    //     method,
-                    //     data.data,
-                    //     socket,
-                    //     data.room
-                    // );
-                    // callback(res);
-                });
+                this.pusher.register(socket);
             }
 
             socket.on('event', data => {
