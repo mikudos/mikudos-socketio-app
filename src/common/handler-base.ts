@@ -1,9 +1,9 @@
-import socket from 'socket.io';
+import { mikudos } from '../namespace';
 
 export class HandlerBase {
     constructor(public eventPath: string) {}
 
-    checkRoom(room: string, socket: socket.Socket): boolean {
-        return Object.keys(socket.rooms).includes(room);
+    async checkRoom(room: string, socket: mikudos.Socket): Promise<boolean> {
+        return (await socket.mikudos.app.clientRooms(socket)).includes(room);
     }
 }

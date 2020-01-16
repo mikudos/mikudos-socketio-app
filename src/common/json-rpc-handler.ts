@@ -16,7 +16,6 @@ export class JSON_RPC_HANDLER extends HandlerBase {
         } catch (error) {
             result.error = this.parseError(error);
         }
-        console.log('TCL: JSON_RPC_HANDLER -> handle -> result', result);
         return result;
     }
 

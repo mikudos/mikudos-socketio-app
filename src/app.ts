@@ -1,33 +1,41 @@
 import config from 'config';
 import socket from 'socket.io';
+const redisAdapter = require('socket.io-redis');
 import _ from 'lodash';
 import { JSON_RPC_HANDLER } from './common/json-rpc-handler';
 import { Authentication, AuthenticationRequest } from './authentication.class';
 import { CHAT_HANDLER, DUPLEX_HANDLER } from './common';
-
-declare namespace mikudos {
-    interface ConfigFunc {
-        (app: Application): void;
-    }
-}
+import { mikudos } from './namespace';
 
 export class Application {
     settings: any;
-    io: socket.Server | socket.Namespace;
+    io: socket.Namespace;
     json_rpc_services?: JSON_RPC_HANDLER;
     chat_services?: CHAT_HANDLER;
-    publishFilter?: (io: socket.Server | socket.Namespace) => Promise<string[]>;
+    rootNamespace?: string;
+    publishFilter?: (
+        app: Application,
+        io: socket.Namespace
+    ) => Promise<string[]>;
     authentication?: Authentication;
     duplex_services?: DUPLEX_HANDLER;
-    constructor(io: socket.Server, public rootNamespace?: string) {
-        this.io = rootNamespace ? io.of(rootNamespace) : io;
+    constructor(
+        public rootIo: socket.Server,
+        {
+            rootNamespace,
+            redisConfig
+        }: {
+            rootNamespace?: string;
+            redisConfig?: { host: string; port: number };
+        } = {}
+    ) {
         this.settings = _.merge({}, config);
-    }
-
-    bind(io: socket.Server, rootNamespace?: string) {
-        this.io = rootNamespace ? io.of(rootNamespace) : io;
-        this.socketInit();
+        if (redisConfig) {
+            this.enable('redisAdaptered');
+            rootIo.adapter(redisAdapter(redisConfig));
+        }
         this.rootNamespace = rootNamespace;
+        this.io = rootNamespace ? rootIo.of(rootNamespace) : rootIo.of('/');
     }
 
     init() {
@@ -35,30 +43,30 @@ export class Application {
     }
 
     get(name: string) {
-        return this.settings[name];
+        return _.get(this.settings, name);
     }
 
     set(name: string, value: any) {
-        this.settings[name] = value;
+        _.set(this.settings, name, value);
         return this;
     }
 
     disable(name: string) {
-        this.settings[name] = false;
+        _.set(this.settings, name, false);
         return this;
     }
 
     disabled(name: string) {
-        return !this.settings[name];
+        return !_.get(this.settings, name);
     }
 
     enable(name: string) {
-        this.settings[name] = true;
+        _.set(this.settings, name, true);
         return this;
     }
 
     enabled(name: string) {
-        return !!this.settings[name];
+        return !!_.get(this.settings, name);
     }
 
     configure(fn: mikudos.ConfigFunc): Application {
@@ -68,7 +76,7 @@ export class Application {
     }
 
     socketInit() {
-        this.io.on('connection', (socket: socket.Socket) => {
+        this.io.on('connection', (socket: mikudos.Socket) => {
             socket.use((reqData: any, next) => {
                 this.parseRequset(reqData, socket);
                 next();
@@ -112,7 +120,7 @@ export class Application {
                                     `Can not find Token at path: ${Auth.tokenPath}`
                                 );
                             socket.handshake.headers.authentication = token;
-                            (socket as any).mikudos.user = authResult.user;
+                            socket.mikudos.user = authResult.user;
                             callback(authResult);
                         } catch (error) {
                             callback({
@@ -123,9 +131,10 @@ export class Application {
                                 }
                             });
                         }
-                        let userId = (socket as any).mikudos.user[
-                            this.get('authentication.entityId') || 'id'
-                        ];
+                        let userId =
+                            socket.mikudos.user[
+                                this.get('authentication.entityId') || 'id'
+                            ];
                         if (userId) {
                             socket.join(userId);
                         }
@@ -145,7 +154,6 @@ export class Application {
                 socket.on(
                     this.chat_services.eventPath,
                     async (data, callback: Function) => {
-                        data.__proto_socket__ = socket;
                         // chat message
                         if (!this.chat_services)
                             throw new Error(
@@ -165,7 +173,6 @@ export class Application {
                 socket.on(
                     `join ${this.chat_services.eventPath}`,
                     async (data, callback: Function) => {
-                        data.__proto_socket__ = socket;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
@@ -184,7 +191,6 @@ export class Application {
                 socket.on(
                     `leave ${this.chat_services.eventPath}`,
                     async (data, callback: Function) => {
-                        data.__proto_socket__ = socket;
                         if (!this.chat_services)
                             throw new Error(
                                 'Chat service must be registered first'
@@ -211,7 +217,7 @@ export class Application {
                         );
                         if (!this.duplex_services)
                             throw new Error(
-                                'Chat service must be registered first'
+                                'Duplex service must be registered first'
                             );
                         let res = await this.duplex_services.handle(
                             namespace,
@@ -262,13 +268,7 @@ export class Application {
                 );
             }
 
-            socket.on('event', data => {
-                console.log('TCL: data', data);
-                /* … */
-            });
             socket.once('disconnect', () => {
-                console.log('TCL: client disconnect');
-                console.log('rooms', socket.rooms);
                 socket.leaveAll();
                 if (this.duplex_services) {
                     this.duplex_services.cancelAllOnSocket(socket.id);
@@ -285,23 +285,95 @@ export class Application {
     // use customized publishFilter
     async publishEvent(response: any) {
         if (!this.publishFilter) return;
-        const rooms = await this.publishFilter(this.io);
+        const rooms = await this.publishFilter(this, this.io);
         rooms.map(clientRoom => {
             this.io.to(clientRoom).emit('rpc-call event', response);
         });
     }
 
-    parseRequset(request: any, socket: socket.Socket) {
-        (socket as any).mikudos = {
+    parseRequset(request: any, socket: mikudos.Socket) {
+        socket.mikudos = {
             app: this,
             provider: 'socketio',
             headers: socket.handshake.headers,
-            remoteAddress: socket.conn.remoteAddress
+            remoteAddress: socket.conn.remoteAddress,
+            user: null
         };
         if (request.length === 1) return;
         if (!request[1].jsonrpc) return;
         // if request is jsonrpc request then parse the request
         request[1] = _.pick(request[1], ['jsonrpc', 'id', 'method', 'params']);
         request[1].socket = socket;
+    }
+
+    /**
+     * Join the remote Room
+     * @param socketId
+     * @param room
+     */
+    async remoteJoin(socketId: string, room: string) {
+        if (!this.enabled('redisAdaptered')) return;
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).remoteJoin(socketId, room, (err: any) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Leave the remote room
+     * @param socketId
+     * @param room
+     */
+    async remoteLeave(socketId: string, room: string) {
+        if (!this.enabled('redisAdaptered')) return;
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).remoteLeave(socketId, room, (err: any) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    }
+
+    async clientRooms(socket: mikudos.Socket): Promise<string[]> {
+        if (this.enabled('redisAdaptered')) {
+            return await new Promise((resolve, reject) => {
+                (this.io.adapter as any).clientRooms(
+                    socket.id,
+                    (err: any, rooms: string[]) => {
+                        if (err) reject(err);
+                        resolve(rooms); // return an array containing every room socketId has joined.
+                    }
+                );
+            });
+        } else {
+            return Object.keys(socket.rooms);
+        }
+    }
+
+    async allRooms() {
+        if (!this.enabled('redisAdaptered')) return;
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).allRooms((err: any, rooms: string[]) => {
+                if (err || !rooms)
+                    reject(err || Error('get no rooms, remote error'));
+                resolve(rooms);
+            });
+        });
+    }
+
+    async remoteDisconnect(socketId: String, close: Boolean = true) {
+        if (!this.enabled('redisAdaptered')) return;
+        await new Promise((resolve, reject) => {
+            (this.io.adapter as any).remoteDisconnect(
+                socketId,
+                close,
+                (err: any) => {
+                    if (err) reject(err);
+                    resolve();
+                }
+            );
+        });
     }
 }

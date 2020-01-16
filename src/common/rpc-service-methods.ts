@@ -13,10 +13,7 @@ export class RpcServiceMethods {
             id: request.id
         };
         const handleFunc = async (request: any, result: any) => {
-            result.result = await this.service[method](
-                request,
-                ...request.params
-            );
+            result.result = await this.service[method](request, request.params);
         };
         const passList = _.compact([
             ...this.hooks.before.all,
