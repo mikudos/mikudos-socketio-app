@@ -5,7 +5,8 @@
     "main": "lib/index.js",
     "scripts": {
         "test": "ts-mocha \"test/**/*.ts\" --recursive --exit",
-        "compile": "shx rm -rf lib/ && tsc"
+        "compile": "shx rm -rf lib/ && tsc",
+        "test-publish": ""
     },
     "repository": {
         "type": "git",
