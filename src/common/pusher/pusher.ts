@@ -23,7 +23,7 @@ export class PUSHER_HANDLER extends HandlerBase {
         return { result: { successed: true } };
     }
 
-    register(socket: SocketIO.Socket) {
+    register(app: Application, socket: SocketIO.Socket) {
         this.serviceRequest.on('', (data: any) => {});
         socket.on('', async (data, callback: Function) => {});
     }

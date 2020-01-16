@@ -265,7 +265,7 @@ export class Application {
             }
 
             if (this.pusher) {
-                this.pusher.register(socket);
+                this.pusher.register(this, socket);
             }
 
             socket.on('event', data => {
