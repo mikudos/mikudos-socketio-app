@@ -22,6 +22,31 @@ import {
     CHAT_HANDLER,
     DUPLEX_HANDLER
 } from 'mikudos-socketio-server';
+
+import http from 'http';
+import socket from 'socket.io';
+import rpcs from './rpcs';
+import publish from './publish';
+import authentication from './authentication';
+import message from './message';
+import duplexs from './duplexs';
+import inter_service_clients from './inter_service_clients';
+
+const server = http.createServer();
+const io = socket(server);
+
+const app = new Application(io);
+app.configure(inter_service_clients);
+app.configure(authentication);
+app.configure(rpcs);
+app.configure(publish);
+app.configure(message);
+app.configure(duplexs);
+
+app.init();
+
+server.listen(app.get('port'));
+console.log('socket.io server started at port: ' + app.get('port'));
 ```
 
 ```js
@@ -35,6 +60,14 @@ var {
     DUPLEX_HANDLER
 } = require('mikudos-socketio-server');
 ```
+
+![mikudos](https://raw.githubusercontent.com/mikudos/doc/master/assets/images/structure.png)
+
+new update
+
+##### Add redisAdapter for horizontal spread
+
+The Architecture show the way to cross centralization with help of grpc duplex communication and socketio with Event manager.
 
 # License
 

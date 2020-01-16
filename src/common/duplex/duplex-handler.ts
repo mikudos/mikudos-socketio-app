@@ -2,11 +2,17 @@ import { get, set, unset, keysIn, forOwn } from 'lodash';
 import socket from 'socket.io';
 import { HandlerBase } from '../handler-base';
 import { EventEmitter } from 'events';
+import { Application } from '../../';
+import { mikudos } from '../../namespace';
 
 export class DUPLEX_HANDLER extends HandlerBase {
-    namespaces: any = {};
+    namespaces: { [key: string]: mikudos.DuplexService } = {};
     socketStreams: { [key: string]: EventEmitter } = {};
-    constructor(namespaces: object, { eventPath = 'stream-call' } = {}) {
+    constructor(
+        public app: Application,
+        namespaces: { [key: string]: mikudos.DuplexService },
+        { eventPath = 'stream-call' } = {}
+    ) {
         super(eventPath);
         this.namespaces = namespaces;
     }
@@ -15,17 +21,19 @@ export class DUPLEX_HANDLER extends HandlerBase {
         namespace: string,
         method: string,
         data: any,
-        socket: socket.Socket,
-        room: string
+        socket: mikudos.Socket,
+        room?: string
     ) {
-        if (!this.checkRoom(room, socket))
-            return {
-                error: {
-                    message: 'you are not in the corresponding room',
-                    class: 'Wrong Room',
-                    code: 2
-                }
-            };
+        if (room) {
+            if (!(await this.checkRoom(room, socket)))
+                return {
+                    error: {
+                        message: 'you are not in the corresponding room',
+                        class: 'Wrong Room',
+                        code: 2
+                    }
+                };
+        }
         let event = get(this.socketStreams, socket.id);
         if (!event || !(event instanceof EventEmitter)) {
             event = new EventEmitter();
@@ -37,11 +45,21 @@ export class DUPLEX_HANDLER extends HandlerBase {
             set(this.socketStreams, socket.id, event);
         }
         try {
-            let before = this.namespaces[namespace].before || [];
-            for await (const fn of before) {
-                data = (await fn(namespace, method, data, socket)) || data;
+            if (!this.namespaces[namespace].service[method]) {
+                return { error: { message: "method dosn't exist" } };
             }
-            this.namespaces[namespace].handle(namespace, method, data, event);
+            let before = (this.namespaces[namespace].before.all || []).concat(
+                this.namespaces[namespace].before[method] || []
+            );
+            for await (const fn of before) {
+                data = await fn(`${namespace}.${method}`, data, socket);
+            }
+            await this.namespaces[namespace].service[method](
+                `${namespace}.${method}`,
+                data,
+                event
+            );
+
             this.socketStreams[socket.id].on(
                 `${namespace}.${method}`,
                 (data: any) => {
@@ -83,7 +101,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         });
     }
 
-    async cancel(namespace: string, method: string, socket: SocketIO.Socket) {
+    async cancel(namespace: string, method: string, socket: mikudos.Socket) {
         let event = get(this.socketStreams, socket.id);
         if (!event)
             return {
@@ -106,8 +124,10 @@ export class DUPLEX_HANDLER extends HandlerBase {
 
     cancelAllOnSocket(id: string) {
         let event = this.socketStreams[id];
-        event.removeAllListeners();
-        unset(this.socketStreams, id);
+        if (event) {
+            event.removeAllListeners();
+            unset(this.socketStreams, id);
+        }
         return { result: { successed: true } };
     }
 }
