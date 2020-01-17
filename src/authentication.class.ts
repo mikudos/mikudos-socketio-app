@@ -45,6 +45,43 @@ export class Authentication {
         this.authJoinCallback = authJoinCallback;
     }
 
+    register(app: Application, socket: mikudos.Socket) {
+        socket.on(
+            this.eventPath,
+            async (data: AuthenticationRequest, callback: Function) => {
+                try {
+                    const authResult = await this.authenticate(data);
+                    let token = _.get(authResult, this.tokenPath);
+                    if (!token)
+                        throw new Error(
+                            `Can not find Token at path: ${this.tokenPath}`
+                        );
+                    socket.handshake.headers.authentication = token;
+                    socket.mikudos.user = authResult.user;
+                    callback(authResult);
+                } catch (error) {
+                    callback({
+                        code: 501,
+                        message: 'Authentication Request Error!',
+                        error: {
+                            info: error.message
+                        }
+                    });
+                }
+                let userId =
+                    socket.mikudos.user[
+                        app.get('authentication.entityId') || 'id'
+                    ];
+                if (userId) {
+                    socket.join(userId);
+                }
+                socket.join('authenticated', () => {
+                    this.authJoinCallback && this.authJoinCallback(socket, app);
+                });
+            }
+        );
+    }
+
     async authenticate(body: AuthenticationRequest) {
         let option = { body, ...this.requsetOption };
         return await rp({ body, ...this.requsetOption });

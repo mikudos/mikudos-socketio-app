@@ -17,6 +17,36 @@ export class DUPLEX_HANDLER extends HandlerBase {
         this.namespaces = namespaces;
     }
 
+    register(app: Application, socket: mikudos.Socket) {
+        socket.on(this.eventPath, async (data, callback: Function) => {
+            const [namespace, method] = String(data.method).split('.');
+            let res = await this.handle(
+                namespace,
+                method,
+                data.data,
+                socket,
+                data.room
+            );
+            callback(res);
+        });
+        socket.on(
+            `${this.eventPath} send`,
+            async (data, callback: Function) => {
+                const [namespace, method] = String(data.method).split('.');
+                let res = await this.send(namespace, method, data.data, socket);
+                callback(res);
+            }
+        );
+        socket.on(
+            `${this.eventPath} cancel`,
+            async (data, callback: Function) => {
+                const [namespace, method] = String(data.method).split('.');
+                let res = await this.cancel(namespace, method, socket);
+                callback(res);
+            }
+        );
+    }
+
     async handle(
         namespace: string,
         method: string,

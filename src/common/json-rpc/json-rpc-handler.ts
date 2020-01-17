@@ -1,4 +1,6 @@
 import { HandlerBase } from '../handler-base';
+import { Application } from '../../app';
+import { mikudos } from '../../namespace';
 
 const JsonRpcError = require('json-rpc-error');
 
@@ -7,6 +9,17 @@ export class JSON_RPC_HANDLER extends HandlerBase {
     constructor(namespaces: object, { eventPath = 'rpc-call' } = {}) {
         super(eventPath);
         this.namespaces = namespaces;
+    }
+
+    register(app: Application, socket: mikudos.Socket) {
+        socket.on(this.eventPath, async (request: any, callback: Function) => {
+            if (!app.io) return;
+            const [namespace, method] = String(request.method).split('.');
+            let response: any = await this.handle(namespace, method, request);
+            response.method = `${namespace}.${method}`;
+            callback(response);
+            app.publishFilter && app.publishEvent(response);
+        });
     }
 
     async handle(namespace: string, method: string, request: any) {

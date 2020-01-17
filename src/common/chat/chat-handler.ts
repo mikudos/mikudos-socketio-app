@@ -13,6 +13,40 @@ export class CHAT_HANDLER extends HandlerBase {
         this.roomPath = roomPath;
     }
 
+    register(app: Application, socket: mikudos.Socket) {
+        socket.on(this.eventPath, async (data, callback: Function) => {
+            // chat message
+            try {
+                let res = await this.handle(data, socket);
+                callback(res);
+            } catch (error) {
+                callback({ error });
+            }
+        });
+        socket.on(
+            `join ${this.eventPath}`,
+            async (data, callback: Function) => {
+                try {
+                    let res = await this.join(data, socket);
+                    callback(res);
+                } catch (error) {
+                    callback({ error });
+                }
+            }
+        );
+        socket.on(
+            `leave ${this.eventPath}`,
+            async (data, callback: Function) => {
+                try {
+                    let res = await this.leave(data, socket);
+                    callback(res);
+                } catch (error) {
+                    callback({ error });
+                }
+            }
+        );
+    }
+
     getRoom(data: any) {
         return _.get(data, this.roomPath);
     }
