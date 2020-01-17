@@ -3,9 +3,10 @@ import { HandlerBase } from '../handler-base';
 import { Application } from '../../app';
 import { EventEmitter } from 'events';
 import { Message, MessageType } from './interfaces';
+import { mikudos } from '../../namespace';
 
 export class PUSHER_HANDLER extends HandlerBase {
-    private pusherRequest?: EventEmitter;
+    private pusherRequest?: any;
     constructor(
         public app: Application,
         { eventPath = 'pusher' } = {},
@@ -15,22 +16,28 @@ export class PUSHER_HANDLER extends HandlerBase {
         super(eventPath);
     }
 
-    register(app: Application, socket: SocketIO.Socket) {
+    register(app: Application) {
         if (!this.pusherRequest) return;
         this.pusherRequest.removeAllListeners();
-        this.pusherRequest.on('data', (data: Message) => {});
+        this.pusherRequest.on('data', async (data: Message) => {
+            if (await app.isIORoomEmpty(data.channelId)) {
+                // 对应组内没有用户
+                data.messageType = MessageType.UNRECEIVED;
+                this.pusherRequest.write(data);
+            } else {
+                // 将消息发送给组内用户
+                app.io.to(data.channelId).emit(`${this.eventPath}`, data);
+            }
+        });
         this.pusherRequest.on('end', (data: any) => {
+            console.debug('request ended:', data);
             this.initDuplexRequest();
-            this.register(app, socket);
+            this.register(app);
         });
         this.pusherRequest.on('error', (data: any) => {
+            console.debug('error:', data);
             this.initDuplexRequest();
-            this.register(app, socket);
-        });
-        socket.on('pusher', async (data: Message, callback: Function) => {
-            if (data.messageType == MessageType.RECEIVED) {
-                this.pusherRequest;
-            }
+            this.register(app);
         });
     }
 

@@ -78,6 +78,7 @@ export class Application {
     }
 
     socketInit() {
+        this.pusher && this.pusher.register(this);
         this.io.on('connection', (socket: mikudos.Socket) => {
             socket.use((reqData: any, next) => {
                 this.parseRequset(reqData, socket);
@@ -93,8 +94,6 @@ export class Application {
             this.chat_services && this.chat_services.register(this, socket);
 
             this.duplex_services && this.duplex_services.register(this, socket);
-
-            this.pusher && this.pusher.register(this, socket);
 
             socket.on('event', data => {
                 console.log('TCL: data', data);
@@ -182,6 +181,15 @@ export class Application {
         } else {
             return Object.keys(socket.rooms);
         }
+    }
+
+    async isIORoomEmpty(room: string) {
+        return await new Promise((resolve, reject) => {
+            this.io.in(room).clients((error: Error, clients: string[]) => {
+                if (error || clients.length == 0) resolve(true);
+                resolve(false);
+            });
+        });
     }
 
     async allRooms() {
