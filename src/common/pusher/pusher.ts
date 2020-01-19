@@ -17,6 +17,7 @@ export class PUSHER_HANDLER extends HandlerBase {
     }
 
     register(app: Application) {
+        console.debug('register pusher on the Application');
         if (!this.pusherRequest) return;
         this.pusherRequest.removeAllListeners();
         this.pusherRequest.on('data', async (data: Message) => {
