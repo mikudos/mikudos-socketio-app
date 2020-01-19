@@ -5,6 +5,7 @@
     "main": "lib/index.js",
     "scripts": {
         "test": "ts-mocha \"test/**/*.ts\" --recursive --exit",
+        "test-pusher": "ts-mocha \"test/pusher.test.ts\" --exit",
         "compile": "shx rm -rf lib/ && tsc",
         "test-publish": ""
     },
@@ -44,6 +45,8 @@
         "@types/mocha": "^5.2.7",
         "@types/socket.io": "^2.1.4",
         "@types/socket.io-client": "^1.4.32",
+        "grpc": "^1.24.2",
+        "grpc-caller": "^0.13.0",
         "husky": "^3.1.0",
         "mikudos-socketio-client": "0.0.7",
         "mocha": "^6.2.2",

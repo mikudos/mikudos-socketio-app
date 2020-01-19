@@ -20,6 +20,7 @@ export class Authentication {
     tokenPath: string;
     authJoinCallback: (socket: mikudos.Socket, app?: Application) => void;
     constructor(
+        public app: Application,
         { protocol, host, port, path, method, headers }: any = {
             protocol: 'http',
             host: '127.0.0.1',
@@ -45,7 +46,7 @@ export class Authentication {
         this.authJoinCallback = authJoinCallback;
     }
 
-    register(app: Application, socket: mikudos.Socket) {
+    register(socket: mikudos.Socket) {
         socket.on(
             this.eventPath,
             async (data: AuthenticationRequest, callback: Function) => {
@@ -70,13 +71,14 @@ export class Authentication {
                 }
                 let userId =
                     socket.mikudos.user[
-                        app.get('authentication.entityId') || 'id'
+                        this.app.get('authentication.entityId') || 'id'
                     ];
                 if (userId) {
                     socket.join(userId);
                 }
                 socket.join('authenticated', () => {
-                    this.authJoinCallback && this.authJoinCallback(socket, app);
+                    this.authJoinCallback &&
+                        this.authJoinCallback(socket, this.app);
                 });
             }
         );
@@ -86,10 +88,4 @@ export class Authentication {
         let option = { body, ...this.requsetOption };
         return await rp({ body, ...this.requsetOption });
     }
-}
-
-export default function(app: Application) {
-    app.authentication = new Authentication({
-        port: 3030
-    });
 }

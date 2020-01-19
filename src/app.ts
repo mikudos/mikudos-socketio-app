@@ -78,7 +78,7 @@ export class Application {
     }
 
     socketInit() {
-        this.pusher && this.pusher.register(this);
+        this.pusher && this.pusher.register();
         this.io.on('connection', (socket: mikudos.Socket) => {
             socket.use((reqData: any, next) => {
                 this.parseRequset(reqData, socket);
@@ -89,9 +89,9 @@ export class Application {
             this.json_rpc_services &&
                 this.json_rpc_services.register(this, socket);
 
-            this.authentication && this.authentication.register(this, socket);
+            this.authentication && this.authentication.register(socket);
 
-            this.chat_services && this.chat_services.register(this, socket);
+            this.chat_services && this.chat_services.register(socket);
 
             this.duplex_services && this.duplex_services.register(this, socket);
 

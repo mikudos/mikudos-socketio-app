@@ -10,35 +10,34 @@ export class PUSHER_HANDLER extends HandlerBase {
     constructor(
         public app: Application,
         { eventPath = 'pusher' } = {},
-        public hooks: { [key: string]: Function[] } = {},
         private pusherService: any
     ) {
         super(eventPath);
     }
 
-    register(app: Application) {
-        console.debug('register pusher on the Application');
+    register() {
+        console.debug('register pusher on Application');
         if (!this.pusherRequest) return;
         this.pusherRequest.removeAllListeners();
         this.pusherRequest.on('data', async (data: Message) => {
-            if (await app.isIORoomEmpty(data.channelId)) {
+            if (await this.app.isIORoomEmpty(data.channelId)) {
                 // 对应组内没有用户
                 data.messageType = MessageType.UNRECEIVED;
                 this.pusherRequest.write(data);
             } else {
                 // 将消息发送给组内用户
-                app.io.to(data.channelId).emit(`${this.eventPath}`, data);
+                this.app.io.to(data.channelId).emit(`${this.eventPath}`, data);
             }
         });
         this.pusherRequest.on('end', (data: any) => {
             console.debug('request ended:', data);
             this.initDuplexRequest();
-            this.register(app);
+            this.register();
         });
         this.pusherRequest.on('error', (data: any) => {
             console.debug('error:', data);
             this.initDuplexRequest();
-            this.register(app);
+            this.register();
         });
     }
 

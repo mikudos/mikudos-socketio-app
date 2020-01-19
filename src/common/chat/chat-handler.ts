@@ -13,7 +13,7 @@ export class CHAT_HANDLER extends HandlerBase {
         this.roomPath = roomPath;
     }
 
-    register(app: Application, socket: mikudos.Socket) {
+    register(socket: mikudos.Socket) {
         socket.on(this.eventPath, async (data, callback: Function) => {
             // chat message
             try {

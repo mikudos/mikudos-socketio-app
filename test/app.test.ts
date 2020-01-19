@@ -6,8 +6,11 @@ import { MikudosSocketIoClient } from 'mikudos-socketio-client';
 
 const port = 3000;
 const rootNamespace = '';
-const io = socket(port);
-const app = new Application(io, { rootNamespace });
+export const io = socket(port);
+// const app = new Application(io, { rootNamespace });
+export const app = new Application(io, {
+    redisConfig: { host: 'localhost', port: 6379 }
+});
 
 describe('Mikudos socketio application tests', () => {
     it('app implement', async () => {
