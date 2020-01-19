@@ -14,13 +14,13 @@ message ConfigRequest { repeated string Keys = 1; }
 message ConfigResponse {}
 
 message PushMessage {
-  bytes msg = 2;
+  string msg = 2;
   string channelId = 3;
   int32 expire = 5;
 }
 
 message Message {
-  bytes msg = 2;
+  string msg = 2;
   string channelId = 3;
   int64 msgId = 4;
   int32 expire = 5;
@@ -32,7 +32,7 @@ message Request { string name = 1; }
 message Response {
   uint32 msgId = 1;
   string channelId = 2;
-  bytes msg = 3;
+  string msg = 3;
   int32 expire = 4;
   MessageType messageType = 7;
 }

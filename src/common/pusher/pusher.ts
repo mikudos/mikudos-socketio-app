@@ -13,10 +13,10 @@ export class PUSHER_HANDLER extends HandlerBase {
         private pusherService: any
     ) {
         super(eventPath);
+        this.initDuplexRequest();
     }
 
     register() {
-        console.debug('register pusher on Application');
         if (!this.pusherRequest) return;
         this.pusherRequest.removeAllListeners();
         this.pusherRequest.on('data', async (data: Message) => {
@@ -39,14 +39,20 @@ export class PUSHER_HANDLER extends HandlerBase {
             this.initDuplexRequest();
             this.register();
         });
+        this.pusherRequest.write({
+            msgId: 0,
+            channelId: 'e82774f2-070f-4ba8-bdc1-f1e8566bb86d',
+            msg: 'test message',
+            expire: 10,
+            messageType: MessageType.UNRECEIVED
+        });
     }
 
     initDuplexRequest() {
-        this.pusherRequest = this.pusherService.GateStream();
-        console.log(
-            'TCL: PUSHER_HANDLER -> initDuplexRequest -> this.pusherRequest',
-            this.pusherRequest
-        );
+        console.debug('init new duplex stream Request');
+        this.pusherRequest = this.pusherService.GateStream({
+            group: 'test-group'
+        });
     }
 
     async handle(

@@ -1,12 +1,17 @@
+import http from 'http';
 import assert from 'assert';
 import { Application } from '../src';
 import socket from 'socket.io';
 import { it } from 'mocha';
 import { MikudosSocketIoClient } from 'mikudos-socketio-client';
 
-const port = 3000;
+export const PORT = 3000;
 const rootNamespace = '';
-export const io = socket(port);
+
+export const server = http.createServer();
+const io = socket(server, {
+    transports: ['websocket']
+});
 // const app = new Application(io, { rootNamespace });
 export const app = new Application(io, {
     redisConfig: { host: 'localhost', port: 6379 }
@@ -20,7 +25,7 @@ describe('Mikudos socketio application tests', () => {
     it('connection', async () => {
         const client = new MikudosSocketIoClient(
             {
-                uri: `ws://localhost:${port}`
+                uri: `ws://localhost:${PORT}`
             },
             { rootNamespace }
         );

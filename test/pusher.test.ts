@@ -1,5 +1,4 @@
-import http from 'http';
-import { io, app } from './app.test';
+import { server, app, PORT } from './app.test';
 import { Application, PUSHER_HANDLER } from '../src';
 const grpc_caller = require('grpc-caller');
 import path from 'path';
@@ -21,4 +20,14 @@ app.pusher = new PUSHER_HANDLER(app, {}, PusherService);
 
 app.init();
 
-io.listen(http.createServer());
+server.listen(PORT);
+
+describe('Use with message pusher service on localhost:50051', () => {
+    it('Test message pusher service', async () => {
+        await new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve();
+            }, 10000);
+        });
+    });
+});
