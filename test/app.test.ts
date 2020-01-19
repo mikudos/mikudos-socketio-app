@@ -14,7 +14,7 @@ const io = socket(server, {
 });
 // const app = new Application(io, { rootNamespace });
 export const app = new Application(io, {
-    redisConfig: { host: 'localhost', port: 6379 }
+    // redisConfig: { host: 'localhost', port: 6379 }
 });
 
 describe('Mikudos socketio application tests', () => {

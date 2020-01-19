@@ -1,9 +1,9 @@
-import { server, app, PORT } from './app.test';
-import { Application, PUSHER_HANDLER } from '../src';
+import { server, app, PORT } from '../app.test';
+import { Application, PUSHER_HANDLER } from '../../src';
 const grpc_caller = require('grpc-caller');
 import path from 'path';
 
-const file = path.resolve(__dirname, './message-pusher.proto');
+const file = path.resolve(__dirname, '../message-pusher.proto');
 const load = {
     keepCase: true,
     longs: String,

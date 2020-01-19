@@ -4,7 +4,7 @@
     "description": "mikudos-socketio-app for connection and call methods and sync events on mikudos-socketio-app server, which is provided only for socket.io connection.",
     "main": "lib/index.js",
     "scripts": {
-        "test": "ts-mocha \"test/**/app.test.ts\" --recursive --exit",
+        "test": "ts-mocha \"test/*.ts\" --recursive --exit",
         "test-pusher": "ts-mocha \"test/pusher.test.ts\" --exit --timeout 61000",
         "compile": "shx rm -rf lib/ && tsc",
         "test-publish": ""
@@ -66,7 +66,6 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm test",
             "pre-push": "npm test"
         }
     },
