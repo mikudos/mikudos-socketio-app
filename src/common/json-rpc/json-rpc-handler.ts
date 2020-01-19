@@ -6,19 +6,23 @@ const JsonRpcError = require('json-rpc-error');
 
 export class JSON_RPC_HANDLER extends HandlerBase {
     namespaces: any = {};
-    constructor(namespaces: object, { eventPath = 'rpc-call' } = {}) {
+    constructor(
+        public app: Application,
+        namespaces: object,
+        { eventPath = 'rpc-call' } = {}
+    ) {
         super(eventPath);
         this.namespaces = namespaces;
     }
 
-    register(app: Application, socket: mikudos.Socket) {
+    register(socket: mikudos.Socket) {
         socket.on(this.eventPath, async (request: any, callback: Function) => {
-            if (!app.io) return;
+            if (!this.app.io) return;
             const [namespace, method] = String(request.method).split('.');
             let response: any = await this.handle(namespace, method, request);
             response.method = `${namespace}.${method}`;
             callback(response);
-            app.publishFilter && app.publishEvent(response);
+            this.app.publishFilter && this.app.publishEvent(response);
         });
     }
 

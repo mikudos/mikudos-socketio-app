@@ -5,7 +5,7 @@
     "main": "lib/index.js",
     "scripts": {
         "test": "ts-mocha \"test/*.ts\" --recursive --exit",
-        "test-pusher": "ts-mocha \"test/pusher.test.ts\" --exit --timeout 61000",
+        "test-pusher": "ts-mocha \"test/handlers/pusher.test.ts\" --exit --timeout 61000",
         "compile": "shx rm -rf lib/ && tsc",
         "test-publish": ""
     },

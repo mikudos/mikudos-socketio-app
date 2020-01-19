@@ -7,19 +7,39 @@ import { mikudos } from '../../namespace';
 
 export class PUSHER_HANDLER extends HandlerBase {
     private pusherRequest?: any;
+    private userIdPath: string;
     constructor(
         public app: Application,
-        { eventPath = 'pusher' } = {},
+        { eventPath = 'pusher', userIdPath = 'id' } = {},
         private pusherService: any
     ) {
         super(eventPath);
+        this.userIdPath = userIdPath;
         this.initDuplexRequest();
     }
 
-    register() {
-        if (!this.pusherRequest) return;
+    register(socket: mikudos.Socket) {
+        socket.on(`${this.eventPath}`, (data: Message) => {
+            // check data type
+            if (data.messageType !== MessageType.RECEIVED) return;
+            data.messageType = MessageType.RECEIVED;
+            data.channelId = String(socket.mikudos.user[this.userIdPath]);
+            this.pusherRequest.write(data);
+        });
+        this.pusherRequest.write({
+            channelId: String(socket.mikudos.user[this.userIdPath]),
+            messageType: MessageType.REQUEST
+        });
+    }
+
+    initDuplexRequest() {
+        console.debug('init new duplex stream Request');
+        this.pusherRequest = this.pusherService.GateStream({
+            group: 'test-group'
+        });
         this.pusherRequest.removeAllListeners();
         this.pusherRequest.on('data', async (data: Message) => {
+            if (!data.channelId) return;
             if (await this.app.isIORoomEmpty(data.channelId)) {
                 // 对应组内没有用户
                 data.messageType = MessageType.UNRECEIVED;
@@ -32,26 +52,10 @@ export class PUSHER_HANDLER extends HandlerBase {
         this.pusherRequest.on('end', (data: any) => {
             console.debug('request ended:', data);
             this.initDuplexRequest();
-            this.register();
         });
         this.pusherRequest.on('error', (data: any) => {
             console.debug('error:', data);
             this.initDuplexRequest();
-            this.register();
-        });
-        this.pusherRequest.write({
-            msgId: 0,
-            channelId: 'e82774f2-070f-4ba8-bdc1-f1e8566bb86d',
-            msg: 'test message',
-            expire: 10,
-            messageType: MessageType.UNRECEIVED
-        });
-    }
-
-    initDuplexRequest() {
-        console.debug('init new duplex stream Request');
-        this.pusherRequest = this.pusherService.GateStream({
-            group: 'test-group'
         });
     }
 
