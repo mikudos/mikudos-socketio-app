@@ -70,7 +70,7 @@ const client = new MikudosSocketIoClient(
     },
     {}
 );
-client.socket.on('connection', () => {
+client.socket.on('connect', () => {
     console.log('client side connected');
     client.authentication({
         strategy: 'local',
