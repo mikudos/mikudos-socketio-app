@@ -65,9 +65,7 @@
         "access": "public"
     },
     "husky": {
-        "hooks": {
-            "pre-push": "npm test"
-        }
+        "hooks": {}
     },
     "types": "index.d.ts"
 }
