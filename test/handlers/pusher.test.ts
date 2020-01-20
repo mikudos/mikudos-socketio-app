@@ -56,7 +56,8 @@ server.listen(PORT);
 describe('Use with message pusher service on localhost:50051', () => {
     const client = new MikudosSocketIoClient(
         {
-            uri: `ws://localhost:${PORT}`
+            uri: `ws://localhost:${PORT}`,
+            option: { transports: ['websocket'] }
         },
         {}
     );
