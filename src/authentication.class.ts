@@ -46,7 +46,7 @@ export class Authentication {
         this.authJoinCallback = authJoinCallback;
     }
 
-    register(socket: mikudos.Socket) {
+    register(socket: mikudos.Socket, authCallback: Function) {
         socket.on(
             this.eventPath,
             async (data: AuthenticationRequest, callback: Function) => {
@@ -59,6 +59,7 @@ export class Authentication {
                         );
                     socket.handshake.headers.authentication = token;
                     socket.mikudos.user = authResult.user;
+                    authCallback(authResult); // !bind other handlers on the authenticated socket
                     callback(authResult);
                 } catch (error) {
                     callback({

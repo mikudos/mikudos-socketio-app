@@ -87,13 +87,15 @@ export class Application {
             // if json_rpc_services configured, then listen the coresponding event
             this.json_rpc_services && this.json_rpc_services.register(socket);
 
-            this.authentication && this.authentication.register(socket);
+            this.authentication &&
+                this.authentication.register(socket, (authResult: any) => {
+                    // register all handlers to be registered after authentication
+                    this.pusher && this.pusher.register(socket);
+                });
 
             this.chat_services && this.chat_services.register(socket);
 
             this.duplex_services && this.duplex_services.register(socket);
-
-            this.pusher && this.pusher.register(socket);
 
             socket.on('event', data => {
                 console.log('TCL: data', data);

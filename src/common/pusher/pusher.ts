@@ -19,6 +19,10 @@ export class PUSHER_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
+        if (!socket.mikudos?.user?.[this.userIdPath])
+            console.error(
+                'socket without authenticated user can not register pusher event'
+            );
         socket.on(`${this.eventPath}`, (data: Message) => {
             // check data type
             if (data.messageType !== MessageType.RECEIVED) return;
@@ -33,7 +37,7 @@ export class PUSHER_HANDLER extends HandlerBase {
     }
 
     initDuplexRequest() {
-        console.debug('init new duplex stream Request');
+        console.debug('init new pusher stream Request');
         this.pusherRequest = this.pusherService.GateStream({
             group: 'test-group'
         });

@@ -6,16 +6,17 @@ import { it } from 'mocha';
 import { MikudosSocketIoClient } from 'mikudos-socketio-client';
 
 export const PORT = 3000;
-const rootNamespace = '';
+export const rootNamespace = '/';
 
 export const server = http.createServer();
 const io = socket(server, {
     transports: ['websocket']
 });
-// const app = new Application(io, { rootNamespace });
-export const app = new Application(io, {
-    // redisConfig: { host: 'localhost', port: 6379 }
-});
+export const app = new Application(io, { rootNamespace });
+// export const app = new Application(io, {
+//     rootNamespace,
+//     redisConfig: { host: 'localhost', port: 6379 }
+// });
 
 describe('Mikudos socketio application tests', () => {
     it('app implement', async () => {
@@ -29,8 +30,11 @@ describe('Mikudos socketio application tests', () => {
             },
             { rootNamespace }
         );
-        client.socket.on('connection', () => {
-            assert.ok('connected successful');
+        let status = await new Promise((resolve, reject) => {
+            client.socket.on('connection', () => {
+                resolve(true);
+            });
         });
+        status && assert.ok('connected successful');
     });
 });
