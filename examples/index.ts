@@ -66,7 +66,8 @@ server.listen(PORT);
 
 const client = new MikudosSocketIoClient(
     {
-        uri: `ws://localhost:${PORT}`
+        uri: `ws://localhost:${PORT}`,
+        option: { transports: ['websocket'] }
     },
     {}
 );
