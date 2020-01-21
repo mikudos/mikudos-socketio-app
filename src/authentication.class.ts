@@ -18,6 +18,7 @@ export class Authentication {
     };
     eventPath: string;
     tokenPath: string;
+    userIdPath: string;
     authJoinCallback: (socket: mikudos.Socket, app?: Application) => void;
     constructor(
         public app: Application,
@@ -32,6 +33,7 @@ export class Authentication {
         {
             tokenPath = 'accessToken',
             eventPath = 'authentication',
+            userIdPath = 'id',
             authJoinCallback = async (
                 socket: mikudos.Socket,
                 app?: Application
@@ -40,6 +42,7 @@ export class Authentication {
     ) {
         this.eventPath = eventPath;
         this.tokenPath = tokenPath;
+        this.userIdPath = userIdPath;
         this.requsetOption.uri = `${protocol}://${host}:${port}${path}`;
         this.requsetOption.method = method || this.requsetOption.method;
         _.assign(this.requsetOption.headers, headers);
@@ -52,6 +55,8 @@ export class Authentication {
             async (data: AuthenticationRequest, callback: Function) => {
                 try {
                     const authResult = await this.authenticate(data);
+                    let channel = _.get(authResult, this.userIdPath);
+                    await this.joinSelfId(socket, channel);
                     let token = _.get(authResult, this.tokenPath);
                     if (!token)
                         throw new Error(
@@ -83,6 +88,13 @@ export class Authentication {
                 });
             }
         );
+    }
+
+    async joinSelfId(socket: mikudos.Socket, id: string) {
+        if (this.app.enabled('redisAdaptered')) {
+            await socket.mikudos.app.remoteJoin(socket.id, id);
+        }
+        socket.join(id);
     }
 
     async authenticate(body: AuthenticationRequest) {
