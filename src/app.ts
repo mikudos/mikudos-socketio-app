@@ -32,6 +32,11 @@ export class Application {
         } = {}
     ) {
         this.settings = _.merge({}, config);
+        this.get('redisAdapter.adapted') &&
+            (redisConfig = {
+                host: this.get('redisAdapter.host'),
+                port: Number(this.get('redisAdapter.port'))
+            });
         if (redisConfig) {
             this.enable('redisAdaptered');
             rootIo.adapter(redisAdapter(redisConfig));

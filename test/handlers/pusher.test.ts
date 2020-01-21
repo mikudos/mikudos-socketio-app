@@ -1,5 +1,6 @@
+import http from 'http';
+import socket from 'socket.io';
 import { pull } from 'lodash';
-import { server, app, rootNamespace, PORT } from '../app.test';
 import { Application, PUSHER_HANDLER, Authentication } from '../../src';
 const grpc_caller = require('grpc-caller');
 import path from 'path';
@@ -7,6 +8,19 @@ import { it } from 'mocha';
 import assert from 'assert';
 import { MikudosSocketIoClient } from 'mikudos-socketio-client';
 import { mikudos } from '../../src/namespace';
+
+export const PORT = 3000;
+export const rootNamespace = '/';
+
+export const server = http.createServer();
+const io = socket(server, {
+    transports: ['websocket']
+});
+export const app = new Application(io, { rootNamespace });
+// export const app = new Application(io, {
+//     rootNamespace,
+//     redisConfig: { host: 'localhost', port: 6379 }
+// });
 
 const file = path.resolve(__dirname, '../message-pusher.proto');
 const load = {
@@ -61,7 +75,7 @@ describe('Use with message pusher service on localhost:50051', () => {
         },
         {}
     );
-    client.socket.on('connection', () => {
+    client.socket.on('connect', () => {
         console.log('client side connected');
         client.authentication({
             strategy: 'local',

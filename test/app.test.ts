@@ -17,6 +17,9 @@ export const app = new Application(io, { rootNamespace });
 //     rootNamespace,
 //     redisConfig: { host: 'localhost', port: 6379 }
 // });
+app.init();
+
+server.listen(PORT);
 
 describe('Mikudos socketio application tests', () => {
     it('app implement', async () => {
@@ -26,12 +29,15 @@ describe('Mikudos socketio application tests', () => {
     it('connection', async () => {
         const client = new MikudosSocketIoClient(
             {
-                uri: `ws://localhost:${PORT}`
+                uri: `ws://localhost:${PORT}`,
+                option: {
+                    transports: ['websocket']
+                }
             },
             { rootNamespace }
         );
         let status = await new Promise((resolve, reject) => {
-            client.socket.on('connection', () => {
+            client.socket.on('connect', () => {
                 resolve(true);
             });
         });
