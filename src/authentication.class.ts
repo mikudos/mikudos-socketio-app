@@ -33,7 +33,7 @@ export class Authentication {
         {
             tokenPath = 'accessToken',
             eventPath = 'authentication',
-            userIdPath = 'id',
+            userIdPath = 'user.id',
             authJoinCallback = async (
                 socket: mikudos.Socket,
                 app?: Application
