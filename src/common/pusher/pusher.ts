@@ -24,7 +24,6 @@ export class PUSHER_HANDLER extends HandlerBase {
                 'socket without authenticated user can not register pusher event'
             );
         let channelId = String(socket.mikudos.user[this.userIdPath]);
-        console.log('TCL: PUSHER_HANDLER -> register -> channelId', channelId);
         socket.on(`${this.eventPath}`, (data: Message) => {
             // check data type
             if (data.messageType !== MessageType.RECEIVED) return;

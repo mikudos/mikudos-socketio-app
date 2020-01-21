@@ -100,10 +100,10 @@ export class Application {
 
             this.duplex_services && this.duplex_services.register(socket);
 
-            socket.on('event', data => {
-                console.log('TCL: data', data);
-                /* … */
-            });
+            // socket.on('event', data => {
+            //     console.log('TCL: data', data);
+            //     /* … */
+            // });
             socket.once('disconnect', () => {
                 socket.leaveAll();
                 if (this.duplex_services) {
@@ -111,10 +111,10 @@ export class Application {
                 }
                 /* … */
             });
-            socket.on('disconnecting', reason => {
-                let rooms = Object.keys(socket.rooms);
-                // ...
-            });
+            // socket.on('disconnecting', reason => {
+            //     let rooms = Object.keys(socket.rooms);
+            //     // ...
+            // });
         });
     }
 
