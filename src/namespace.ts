@@ -24,11 +24,14 @@ export declare namespace mikudos {
     }
 
     interface DuplexService {
-        new (handler: DUPLEX_HANDLER, app: Application): DuplexService;
         serviceKey: string;
         serviceClass: any;
         service: { [key: string]: Function };
         before: { [key: string]: DuplexHandle[] };
+    }
+
+    interface DuplexServiceConstructor extends DuplexService {
+        new (handler: DUPLEX_HANDLER, app: Application): DuplexService;
     }
 
     interface DuplexHandle {
