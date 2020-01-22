@@ -3,13 +3,11 @@ import { DUPLEX_HANDLER } from './common';
 
 export declare namespace mikudos {
     interface duplexHooks {
-        [key: string]: [
-            (
-                eventName: string,
-                data: any,
-                socket: mikudos.Socket
-            ) => Promise<any>
-        ];
+        [key: string]: ((
+            eventName: string,
+            data: any,
+            socket: mikudos.Socket
+        ) => Promise<any>)[];
     }
     interface ConfigFunc {
         (app: Application): void;
