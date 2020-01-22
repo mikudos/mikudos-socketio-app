@@ -10,14 +10,18 @@ export class DUPLEX_HANDLER extends HandlerBase {
     socketStreams: { [key: string]: EventEmitter } = {};
     constructor(
         public app: Application,
-        servicesConstructor: (
-            handler: DUPLEX_HANDLER,
-            app: Application
-        ) => { [key: string]: mikudos.DuplexService },
+        serviceClasses: [mikudos.DuplexService],
         { eventPath = 'stream-call' } = {}
     ) {
         super(eventPath);
-        this.namespaces = servicesConstructor(this, this.app);
+        serviceClasses.forEach(sc => {
+            this.namespaces[sc.serviceKey] = new sc(
+                sc.hooks,
+                sc.serviceClass,
+                this,
+                app
+            );
+        });
     }
 
     register(socket: mikudos.Socket) {

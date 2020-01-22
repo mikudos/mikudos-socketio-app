@@ -63,14 +63,4 @@ export class PUSHER_HANDLER extends HandlerBase {
             this.initDuplexRequest();
         });
     }
-
-    async handle(
-        namespace: string,
-        method: string,
-        data: any,
-        room: string,
-        socket: SocketIO.Socket
-    ) {
-        return { result: { successed: true } };
-    }
 }
