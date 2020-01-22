@@ -15,12 +15,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
     ) {
         super(eventPath);
         serviceClasses.forEach(sc => {
-            this.namespaces[sc.serviceKey] = new sc(
-                sc.hooks,
-                sc.serviceClass,
-                this,
-                app
-            );
+            this.namespaces[sc.serviceKey] = new sc(this, app);
         });
     }
 

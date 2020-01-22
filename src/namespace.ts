@@ -26,15 +26,9 @@ export declare namespace mikudos {
     }
 
     interface DuplexService {
-        new (
-            hooks: duplexHooks,
-            serviceHandle: any,
-            handler: DUPLEX_HANDLER,
-            app: Application
-        ): DuplexService;
+        new (handler: DUPLEX_HANDLER, app: Application): DuplexService;
         serviceKey: string;
         serviceClass: any;
-        hooks: duplexHooks;
         service: { [key: string]: Function };
         before: { [key: string]: DuplexHandle[] };
     }
