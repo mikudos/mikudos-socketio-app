@@ -30,7 +30,7 @@ export declare namespace mikudos {
         before: { [key: string]: DuplexHandle[] };
     }
 
-    interface DuplexServiceConstructor extends DuplexService {
+    interface DuplexServiceConstructor {
         new (handler: DUPLEX_HANDLER, app: Application): DuplexService;
     }
 
