@@ -32,12 +32,11 @@ class Grpc1 {
 }
 
 class Service implements mikudos.DuplexService {
-    constructor(
-        public before: { [key: string]: mikudos.DuplexHandle[] } = {},
-        public service: any
-    ) {}
+    public serviceKey = '';
+    public serviceClass = {};
+    public service: any = {};
+    public before = { call: [] };
+    constructor(private handler: DUPLEX_HANDLER, private app: Application) {}
 }
 
-app.duplex_services = new DUPLEX_HANDLER(app, {
-    grpc1: new Service({}, new Grpc1())
-});
+app.duplex_services = new DUPLEX_HANDLER(app, [{ key: '', sc: Service }]);
