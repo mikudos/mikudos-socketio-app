@@ -8,13 +8,22 @@ import { mikudos } from '../../namespace';
 export class PUSHER_HANDLER extends HandlerBase {
     private pusherRequest?: any;
     private userIdPath: string;
+    private syncMode: string;
+    private groupId: string;
     constructor(
         public app: Application,
-        { eventPath = 'pusher', userIdPath = 'id' } = {},
+        {
+            eventPath = 'pusher',
+            userIdPath = 'id',
+            syncMode = 'group',
+            groupId = 'test-group'
+        } = {},
         private pusherService: any
     ) {
         super(eventPath);
         this.userIdPath = userIdPath;
+        this.syncMode = syncMode;
+        this.groupId = groupId;
         this.initDuplexRequest();
     }
 
@@ -39,9 +48,13 @@ export class PUSHER_HANDLER extends HandlerBase {
 
     initDuplexRequest() {
         console.debug('init new pusher stream Request');
-        this.pusherRequest = this.pusherService.GateStream({
-            group: 'test-group'
-        });
+        this.pusherRequest = this.pusherService.GateStream(
+            this.syncMode === 'group'
+                ? {
+                      group: this.groupId
+                  }
+                : {}
+        );
         this.pusherRequest.removeAllListeners();
         this.pusherRequest.on('data', async (data: Message) => {
             if (!data.channelId) return;
