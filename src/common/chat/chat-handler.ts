@@ -4,12 +4,14 @@ import { Application } from '../../app';
 import { mikudos } from '../../namespace';
 export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;
+    public authenticated: boolean;
     constructor(
         public app: Application,
-        { eventPath = 'message', roomPath = 'room' } = {},
+        { eventPath = 'message', roomPath = 'room', authenticated = true } = {},
         public hooks: { [key: string]: Function[] } = {}
     ) {
         super(eventPath);
+        this.authenticated = authenticated;
         this.roomPath = roomPath;
     }
 

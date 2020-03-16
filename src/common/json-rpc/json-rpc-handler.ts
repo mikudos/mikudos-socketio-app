@@ -6,12 +6,14 @@ const JsonRpcError = require('json-rpc-error');
 
 export class JSON_RPC_HANDLER extends HandlerBase {
     namespaces: any = {};
+    public authentiated: boolean;
     constructor(
         public app: Application,
         namespaces: object,
-        { eventPath = 'rpc-call' } = {}
+        { eventPath = 'rpc-call', authenticated = true } = {}
     ) {
         super(eventPath);
+        this.authentiated = authenticated;
         this.namespaces = namespaces;
     }
 

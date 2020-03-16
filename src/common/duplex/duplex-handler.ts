@@ -6,14 +6,16 @@ import { Application } from '../../';
 import { mikudos } from '../../namespace';
 
 export class DUPLEX_HANDLER extends HandlerBase {
+    public authenticated: boolean;
     namespaces: { [key: string]: mikudos.DuplexService } = {};
     socketStreams: { [key: string]: EventEmitter } = {};
     constructor(
         public app: Application,
         serviceClasses: [{ key: string; sc: mikudos.DuplexServiceConstructor }],
-        { eventPath = 'stream-call' } = {}
+        { eventPath = 'stream-call', authenticated = true } = {}
     ) {
         super(eventPath);
+        this.authenticated = authenticated;
         serviceClasses.forEach(c => {
             this.namespaces[c.key] = new c.sc(this, app);
         });
