@@ -66,6 +66,17 @@ export class Authentication {
                     socket.mikudos.user = authResult.user;
                     authCallback(authResult); // !bind other handlers on the authenticated socket
                     callback(authResult);
+                    let userId =
+                        socket.mikudos.user[
+                            this.app.get('authentication.entityId') || 'id'
+                        ];
+                    if (userId) {
+                        socket.join(userId);
+                    }
+                    socket.join('authenticated', () => {
+                        this.authJoinCallback &&
+                            this.authJoinCallback(socket, this.app);
+                    });
                 } catch (error) {
                     callback({
                         code: 501,
@@ -75,17 +86,6 @@ export class Authentication {
                         }
                     });
                 }
-                let userId =
-                    socket.mikudos.user[
-                        this.app.get('authentication.entityId') || 'id'
-                    ];
-                if (userId) {
-                    socket.join(userId);
-                }
-                socket.join('authenticated', () => {
-                    this.authJoinCallback &&
-                        this.authJoinCallback(socket, this.app);
-                });
             }
         );
     }
