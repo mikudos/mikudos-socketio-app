@@ -69,7 +69,7 @@ export class Authentication {
                 } catch (error) {
                     callback({
                         code: 501,
-                        message: 'Authentication Request Error!',
+                        message: 'Invalid login',
                         error: {
                             info: error.message
                         }
