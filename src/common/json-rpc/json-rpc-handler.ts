@@ -18,8 +18,10 @@ export class JSON_RPC_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
+        let mikudos = socket.mikudos;
         socket.on(this.eventPath, async (request: any, callback: Function) => {
             if (!this.app.io) return;
+            socket.mikudos = mikudos;
             request.socket = socket;
             const [namespace, method] = String(request.method).split('.');
             let response: any = await this.handle(namespace, method, request);
