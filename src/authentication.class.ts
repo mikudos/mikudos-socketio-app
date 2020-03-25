@@ -19,7 +19,11 @@ export class Authentication {
     eventPath: string;
     tokenPath: string;
     userIdPath: string;
-    authJoinCallback: (socket: mikudos.Socket, app?: Application) => void;
+    authJoinCallback: (
+        socket: mikudos.Socket,
+        app?: Application,
+        authResult?: any
+    ) => void;
     constructor(
         public app: Application,
         { protocol, host, port, path, method, headers }: any = {
@@ -36,7 +40,8 @@ export class Authentication {
             userIdPath = 'user.id',
             authJoinCallback = async (
                 socket: mikudos.Socket,
-                app?: Application
+                app?: Application,
+                authResult?: any
             ) => {}
         } = {}
     ) {
@@ -75,7 +80,7 @@ export class Authentication {
                     }
                     socket.join('authenticated', () => {
                         this.authJoinCallback &&
-                            this.authJoinCallback(socket, this.app);
+                            this.authJoinCallback(socket, this.app, authResult);
                     });
                 } catch (error) {
                     callback({
