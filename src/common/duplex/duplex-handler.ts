@@ -82,9 +82,9 @@ export class DUPLEX_HANDLER extends HandlerBase {
             if (!this.namespaces[namespace].service[method]) {
                 return { error: { message: "method dosn't exist" } };
             }
-            let before = (this.namespaces[namespace].before.all || []).concat(
-                this.namespaces[namespace].before[method] || []
-            );
+            let before = (
+                this.namespaces?.[namespace]?.before?.all || []
+            ).concat(this.namespaces?.[namespace]?.before?.[method] || []);
             for await (const fn of before) {
                 data = await fn(`${namespace}.${method}`, data, socket);
             }
