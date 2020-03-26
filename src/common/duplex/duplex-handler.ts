@@ -79,7 +79,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
             set(this.socketStreams, socket.id, event);
         }
         try {
-            if (!this.namespaces[namespace].service[method]) {
+            if (!this.namespaces[namespace][method]) {
                 return { error: { message: "method dosn't exist" } };
             }
             let before = (
@@ -88,7 +88,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
             for await (const fn of before) {
                 data = await fn(`${namespace}.${method}`, data, socket);
             }
-            await this.namespaces[namespace].service[method](
+            await this.namespaces[namespace][method](
                 `${namespace}.${method}`,
                 data,
                 event
@@ -108,6 +108,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
                 }
             );
         } catch (error) {
+            console.error('DUPLEX_HANDLER -> error', error);
             let event = get(this.socketStreams, socket.id);
             if (event) event.removeAllListeners(`${namespace}.${method}`);
             return { error: { message: 'Request Error' } };

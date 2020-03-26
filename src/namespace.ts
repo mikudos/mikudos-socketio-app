@@ -26,8 +26,8 @@ export declare namespace mikudos {
     interface DuplexService {
         serviceKey: string;
         serviceClass: any;
-        service: { [key: string]: Function };
         before: { [key: string]: DuplexHandle[] };
+        [key: string]: any;
     }
 
     interface DuplexServiceConstructor {
