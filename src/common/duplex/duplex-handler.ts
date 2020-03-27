@@ -22,7 +22,9 @@ export class DUPLEX_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
+        const user = socket.mikudos.user;
         socket.on(this.eventPath, async (data, callback: Function) => {
+            socket.mikudos.user = user;
             const [namespace, method] = String(data.method).split('.');
             let res = await this.handle(
                 namespace,
@@ -36,6 +38,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         socket.on(
             `${this.eventPath} send`,
             async (data, callback: Function) => {
+                socket.mikudos.user = user;
                 const [namespace, method] = String(data.method).split('.');
                 let res = await this.send(namespace, method, data.data, socket);
                 callback(res);
@@ -44,6 +47,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         socket.on(
             `${this.eventPath} cancel`,
             async (data, callback: Function) => {
+                socket.mikudos.user = user;
                 const [namespace, method] = String(data.method).split('.');
                 let res = await this.cancel(namespace, method, socket);
                 callback(res);

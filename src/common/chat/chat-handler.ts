@@ -16,7 +16,9 @@ export class CHAT_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
+        const user = socket.mikudos.user;
         socket.on(this.eventPath, async (data, callback: Function) => {
+            socket.mikudos.user = user;
             // chat message
             try {
                 let res = await this.handle(data, socket);
@@ -28,6 +30,7 @@ export class CHAT_HANDLER extends HandlerBase {
         socket.on(
             `join ${this.eventPath}`,
             async (data, callback: Function) => {
+                socket.mikudos.user = user;
                 try {
                     let res = await this.join(data, socket);
                     callback(res);
@@ -39,6 +42,7 @@ export class CHAT_HANDLER extends HandlerBase {
         socket.on(
             `leave ${this.eventPath}`,
             async (data, callback: Function) => {
+                socket.mikudos.user = user;
                 try {
                     let res = await this.leave(data, socket);
                     callback(res);
