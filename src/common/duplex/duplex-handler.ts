@@ -117,7 +117,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
             if (event) event.removeAllListeners(`${namespace}.${method}`);
             return { error: { message: 'Request Error' } };
         }
-        return { result: { successed: true } };
+        return { result: { success: true } };
     }
 
     async send(
@@ -167,6 +167,6 @@ export class DUPLEX_HANDLER extends HandlerBase {
             event.removeAllListeners();
             unset(this.socketStreams, id);
         }
-        return { result: { successed: true } };
+        return { result: { success: true } };
     }
 }

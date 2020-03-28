@@ -77,7 +77,7 @@ export class CHAT_HANDLER extends HandlerBase {
             };
         // broadcast chat message exclud self or to another socket id
         socket.to(room).emit(this.eventPath, data);
-        return { result: { successed: true } };
+        return { result: { success: true } };
     }
 
     async join(data: any, socket: mikudos.Socket) {
@@ -113,7 +113,7 @@ export class CHAT_HANDLER extends HandlerBase {
                 socket_id: socket.id
             });
         });
-        return { result: { successed: true } };
+        return { result: { success: true } };
     }
 
     async leave(data: any, socket: mikudos.Socket) {
@@ -140,6 +140,6 @@ export class CHAT_HANDLER extends HandlerBase {
             await socket.mikudos.app.remoteLeave(socket.id, room);
         }
         socket.leave(room);
-        return { result: { successed: true } };
+        return { result: { success: true } };
     }
 }
