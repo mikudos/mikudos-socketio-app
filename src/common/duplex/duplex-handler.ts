@@ -130,14 +130,6 @@ export class DUPLEX_HANDLER extends HandlerBase {
         if (!event)
             return { error: { message: 'Request Not exist or is finished' } };
         event.emit(`${namespace}.${method} send`, data);
-        return await new Promise((resolve, reject) => {
-            event.once(`${namespace}.${method} send`, data => resolve(data));
-            setTimeout(() => {
-                resolve({
-                    error: { message: 'Request Timeout' }
-                });
-            }, 10000);
-        });
     }
 
     async cancel(namespace: string, method: string, socket: mikudos.Socket) {
@@ -151,14 +143,6 @@ export class DUPLEX_HANDLER extends HandlerBase {
         // cancel first
         event.emit(`${namespace}.${method} cancel`);
         event.removeAllListeners(`${namespace}.${method}`);
-        return await new Promise((resolve, reject) => {
-            event.once(`${namespace}.${method} cancel`, data => resolve(data));
-            setTimeout(() => {
-                resolve({
-                    error: { message: 'Request Timeout' }
-                });
-            }, 10000);
-        });
     }
 
     cancelAllOnSocket(id: string) {
