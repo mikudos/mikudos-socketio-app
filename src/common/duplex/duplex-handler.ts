@@ -129,9 +129,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         let event = get(this.socketStreams, socket.id);
         if (!event)
             return { error: { message: 'Request Not exist or is finished' } };
-        event.emit(`${namespace}.${method} send`, data, {
-            mikudos: socket.mikudos
-        });
+        event.emit(`${namespace}.${method} send`, data, socket.mikudos);
     }
 
     async cancel(namespace: string, method: string, socket: mikudos.Socket) {
