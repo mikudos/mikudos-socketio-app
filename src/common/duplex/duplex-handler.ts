@@ -124,12 +124,14 @@ export class DUPLEX_HANDLER extends HandlerBase {
         namespace: string,
         method: string,
         data: any,
-        socket: SocketIO.Socket
+        socket: mikudos.Socket
     ) {
         let event = get(this.socketStreams, socket.id);
         if (!event)
             return { error: { message: 'Request Not exist or is finished' } };
-        event.emit(`${namespace}.${method} send`, data);
+        event.emit(`${namespace}.${method} send`, data, {
+            mikudos: socket.mikudos
+        });
     }
 
     async cancel(namespace: string, method: string, socket: mikudos.Socket) {
@@ -141,7 +143,9 @@ export class DUPLEX_HANDLER extends HandlerBase {
                 }
             };
         // cancel first
-        event.emit(`${namespace}.${method} cancel`);
+        event.emit(`${namespace}.${method} cancel`, {
+            mikudos: socket.mikudos
+        });
         event.removeAllListeners(`${namespace}.${method}`);
     }
 
