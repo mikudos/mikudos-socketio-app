@@ -4,15 +4,22 @@ import { Application } from '../../app';
 import { mikudos } from '../../namespace';
 export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;
+    emitToSelfPath: string;
     public authenticated: boolean;
     constructor(
         public app: Application,
-        { eventPath = 'message', roomPath = 'room', authenticated = true } = {},
+        {
+            eventPath = 'message',
+            roomPath = 'room',
+            emitToSelfPath = 'emitToSelf',
+            authenticated = true
+        } = {},
         public hooks: { [key: string]: Function[] } = {}
     ) {
         super(eventPath);
         this.authenticated = authenticated;
         this.roomPath = roomPath;
+        this.emitToSelfPath = emitToSelfPath;
     }
 
     register(socket: mikudos.Socket) {
@@ -57,6 +64,10 @@ export class CHAT_HANDLER extends HandlerBase {
         return _.get(data, this.roomPath);
     }
 
+    isSelfToBeEmit(data: any) {
+        return !!_.get(data, this.emitToSelfPath);
+    }
+
     getUser(socket: mikudos.Socket) {
         return socket.mikudos.user;
     }
@@ -67,6 +78,7 @@ export class CHAT_HANDLER extends HandlerBase {
             await hook.call(this, data, socket);
         }
         let room = this.getRoom(data);
+        let emitToSelf = this.isSelfToBeEmit(data);
         if (!room)
             return {
                 error: {
@@ -77,6 +89,7 @@ export class CHAT_HANDLER extends HandlerBase {
             };
         // broadcast chat message exclud self or to another socket id
         socket.to(room).emit(this.eventPath, data);
+        if (emitToSelf) socket.emit(this.eventPath, data);
         return { result: { success: true } };
     }
 
