@@ -14,7 +14,10 @@ export class CHAT_HANDLER extends HandlerBase {
             emitToSelfPath = 'emitToSelf',
             authenticated = true
         } = {},
-        public hooks: { [key: string]: Function[] } = {}
+        public hooks: {
+            before: { [key: string]: Function[] };
+            after: { [key: string]: Function[] };
+        } = { before: {}, after: {} }
     ) {
         super(eventPath);
         this.authenticated = authenticated;
@@ -73,8 +76,13 @@ export class CHAT_HANDLER extends HandlerBase {
     }
 
     async handle(data: any, socket: mikudos.Socket) {
-        const hooks = _.compact(_.concat(this.hooks.all, this.hooks.chat));
-        for await (const hook of hooks) {
+        const beforeHooks = _.compact(
+            _.concat(this.hooks.before.all, this.hooks.before.chat)
+        );
+        const afterHooks = _.compact(
+            _.concat(this.hooks.after.all, this.hooks.after.chat)
+        );
+        for await (const hook of beforeHooks) {
             await hook.call(this, data, socket);
         }
         let room = this.getRoom(data);
@@ -90,12 +98,21 @@ export class CHAT_HANDLER extends HandlerBase {
         // broadcast chat message exclud self or to another socket id
         socket.to(room).emit(this.eventPath, data);
         if (emitToSelf) socket.emit(this.eventPath, data);
+        // add after hooks to chat
+        for await (const hook of afterHooks) {
+            await hook.call(this, data, socket);
+        }
         return { result: { success: true } };
     }
 
     async join(data: any, socket: mikudos.Socket) {
-        const hooks = _.compact(_.concat(this.hooks.all, this.hooks.join));
-        for await (const hook of hooks) {
+        const beforeHooks = _.compact(
+            _.concat(this.hooks.before.all, this.hooks.before.join)
+        );
+        const afterHooks = _.compact(
+            _.concat(this.hooks.after.all, this.hooks.after.join)
+        );
+        for await (const hook of beforeHooks) {
             await hook.call(this, data, socket);
         }
         let room = this.getRoom(data);
@@ -126,12 +143,20 @@ export class CHAT_HANDLER extends HandlerBase {
                 socket_id: socket.id
             });
         });
+        for await (const hook of afterHooks) {
+            await hook.call(this, data, socket);
+        }
         return { result: { success: true } };
     }
 
     async leave(data: any, socket: mikudos.Socket) {
-        const hooks = _.compact(_.concat(this.hooks.all, this.hooks.leave));
-        for await (const hook of hooks) {
+        const beforeHooks = _.compact(
+            _.concat(this.hooks.before.all, this.hooks.before.leave)
+        );
+        const afterHooks = _.compact(
+            _.concat(this.hooks.after.all, this.hooks.after.leave)
+        );
+        for await (const hook of beforeHooks) {
             await hook.call(this, data, socket);
         }
         let room = this.getRoom(data);
@@ -153,6 +178,9 @@ export class CHAT_HANDLER extends HandlerBase {
             await socket.mikudos.app.remoteLeave(socket.id, room);
         }
         socket.leave(room);
+        for await (const hook of afterHooks) {
+            await hook.call(this, data, socket);
+        }
         return { result: { success: true } };
     }
 }
