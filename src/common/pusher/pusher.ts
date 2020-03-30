@@ -30,6 +30,7 @@ export class PUSHER_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
+        debug(`register json-rpc service with auth`);
         if (!socket.mikudos?.user?.[this.userIdPath])
             console.error(
                 'socket without authenticated user can not register pusher event'
@@ -49,7 +50,7 @@ export class PUSHER_HANDLER extends HandlerBase {
     }
 
     initDuplexRequest() {
-        console.debug('init new pusher stream Request');
+        debug('init new pusher stream Request');
         this.pusherRequest = this.pusherService.GateStream(
             this.syncMode === 'group'
                 ? {
@@ -59,6 +60,7 @@ export class PUSHER_HANDLER extends HandlerBase {
         );
         this.pusherRequest.removeAllListeners();
         this.pusherRequest.on('data', async (data: Message) => {
+            debug('new pusher message', data);
             if (!data.channelId) return;
             if (await this.app.isIORoomEmpty(data.channelId)) {
                 // 对应组内没有用户
@@ -70,11 +72,11 @@ export class PUSHER_HANDLER extends HandlerBase {
             }
         });
         this.pusherRequest.on('end', (data: any) => {
-            console.debug('request ended:', data);
+            debug('pusher request ended:', data);
             this.initDuplexRequest();
         });
         this.pusherRequest.on('error', (data: any) => {
-            console.debug('error:', data);
+            debug('pusher request error:', data);
             this.initDuplexRequest();
         });
     }

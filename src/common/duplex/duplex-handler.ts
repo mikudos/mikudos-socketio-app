@@ -24,9 +24,12 @@ export class DUPLEX_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
-        let mikudos = socket.mikudos;
+        debug(
+            `register duplex service ${
+                this.authenticated ? 'with auth' : 'without auth'
+            }`
+        );
         socket.on(this.eventPath, async (data, callback: Function) => {
-            socket.mikudos = mikudos;
             const [namespace, method] = String(data.method).split('.');
             let res = await this.handle(
                 namespace,
@@ -40,7 +43,6 @@ export class DUPLEX_HANDLER extends HandlerBase {
         socket.on(
             `${this.eventPath} send`,
             async (data, callback: Function) => {
-                socket.mikudos = mikudos;
                 const [namespace, method] = String(data.method).split('.');
                 let res = await this.send(namespace, method, data.data, socket);
                 callback(res);
@@ -49,7 +51,6 @@ export class DUPLEX_HANDLER extends HandlerBase {
         socket.on(
             `${this.eventPath} cancel`,
             async (data, callback: Function) => {
-                socket.mikudos = mikudos;
                 const [namespace, method] = String(data.method).split('.');
                 let res = await this.cancel(namespace, method, socket);
                 callback(res);
@@ -152,6 +153,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
     cancelAllOnSocket(id: string) {
         let event = this.socketStreams[id];
         if (event) {
+            debug('socket has duplex eventStream to be remove: %o', id);
             event.removeAllListeners();
             unset(this.socketStreams, id);
         }

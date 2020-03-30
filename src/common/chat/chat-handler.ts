@@ -28,9 +28,12 @@ export class CHAT_HANDLER extends HandlerBase {
     }
 
     register(socket: mikudos.Socket) {
-        let mikudos = socket.mikudos;
+        debug(
+            `register chat service ${
+                this.authenticated ? 'with auth' : 'without auth'
+            }`
+        );
         socket.on(this.eventPath, async (data, callback: Function) => {
-            socket.mikudos = mikudos;
             // chat message
             try {
                 let res = await this.handle(data, socket);
@@ -42,7 +45,6 @@ export class CHAT_HANDLER extends HandlerBase {
         socket.on(
             `join ${this.eventPath}`,
             async (data, callback: Function) => {
-                socket.mikudos = mikudos;
                 try {
                     let res = await this.join(data, socket);
                     callback(res);
@@ -54,7 +56,6 @@ export class CHAT_HANDLER extends HandlerBase {
         socket.on(
             `leave ${this.eventPath}`,
             async (data, callback: Function) => {
-                socket.mikudos = mikudos;
                 try {
                     let res = await this.leave(data, socket);
                     callback(res);
@@ -97,9 +98,12 @@ export class CHAT_HANDLER extends HandlerBase {
                     code: 1
                 }
             };
-        // broadcast chat message exclud self or to another socket id
         socket.to(room).emit(this.eventPath, data);
-        if (emitToSelf) socket.emit(this.eventPath, data);
+        debug('broadcast chat message exclud self:', data);
+        if (emitToSelf) {
+            socket.emit(this.eventPath, data);
+            debug('emit chat message to self');
+        }
         // add after hooks to chat
         for await (const hook of afterHooks) {
             await hook.call(this, data, socket);
@@ -135,15 +139,15 @@ export class CHAT_HANDLER extends HandlerBase {
                 }
             };
         let user = this.getUser(socket);
-        if (this.app.enabled('redisAdaptered')) {
-            await socket.mikudos.app.remoteJoin(socket.id, room);
-        }
+        await socket.mikudos.app.remoteJoin(socket.id, room);
         socket.join(room, () => {
+            debug('joined room: %o, socket: %o', room, socket.id);
             socket.to(room).emit(`join ${this.eventPath}`, {
                 room,
                 user,
                 socket_id: socket.id
             });
+            debug('emit join event to room: %o, socket: %o', room, socket.id);
         });
         for await (const hook of afterHooks) {
             await hook.call(this, data, socket);
@@ -176,10 +180,10 @@ export class CHAT_HANDLER extends HandlerBase {
             user,
             socket_id: socket.id
         });
-        if (this.app.enabled('redisAdaptered')) {
-            await socket.mikudos.app.remoteLeave(socket.id, room);
-        }
+        debug('emit leave event to room: %o, socket: %o', room, socket.id);
+        await socket.mikudos.app.remoteLeave(socket.id, room);
         socket.leave(room);
+        debug('leaved room: %o, socket: %o', room, socket.id);
         for await (const hook of afterHooks) {
             await hook.call(this, data, socket);
         }

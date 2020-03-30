@@ -102,10 +102,10 @@ export class Application {
 
             this.authentication &&
                 this.authentication.register(socket, (authResult: any) => {
-                    // register all handlers to be registered after authentication
+                    debug('register all authenticated handlers');
                     this.pusher && this.pusher.register(socket);
                     this.json_rpc_services &&
-                        this.json_rpc_services.authentiated &&
+                        this.json_rpc_services.authenticated &&
                         this.json_rpc_services.register(socket);
                     this.chat_services &&
                         this.chat_services.authenticated &&
@@ -115,9 +115,9 @@ export class Application {
                         this.duplex_services.register(socket);
                 });
 
-            // if json_rpc_services configured, then listen the coresponding event
+            debug('register all unauthenticated handlers');
             this.json_rpc_services &&
-                !this.json_rpc_services.authentiated &&
+                !this.json_rpc_services.authenticated &&
                 this.json_rpc_services.register(socket);
             this.chat_services &&
                 !this.chat_services.authenticated &&
@@ -126,13 +126,12 @@ export class Application {
                 !this.duplex_services.authenticated &&
                 this.duplex_services.register(socket);
 
-            // socket.on('event', data => {
-            //     console.log('TCL: data', data);
-            //     /* … */
-            // });
             socket.once('disconnect', () => {
+                debug('socket disconnected %o', socket.id);
                 socket.leaveAll();
+                debug('all rooms leaved');
                 if (this.duplex_services) {
+                    debug('canncel processing duplex service');
                     this.duplex_services.cancelAllOnSocket(socket.id);
                 }
                 /* … */
@@ -147,6 +146,9 @@ export class Application {
     // use customized publishFilter
     async publishEvent(response: any) {
         if (!this.publishFilter) return;
+        debug(
+            'publishFilter method provided, publish event to all filtered socket'
+        );
         const rooms = await this.publishFilter(this, this.io);
         rooms.map(clientRoom => {
             this.io.to(clientRoom).emit('rpc-call event', response);
@@ -169,6 +171,7 @@ export class Application {
      */
     async remoteJoin(socketId: string, room: string) {
         if (!this.enabled('redisAdaptered')) return;
+        debug('remoteJoin with redisAdapter');
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).remoteJoin(socketId, room, (err: any) => {
                 if (err) reject(err);
@@ -184,6 +187,7 @@ export class Application {
      */
     async remoteLeave(socketId: string, room: string) {
         if (!this.enabled('redisAdaptered')) return;
+        debug('remoteLeave with redisAdapter');
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).remoteLeave(socketId, room, (err: any) => {
                 if (err) reject(err);
@@ -219,7 +223,7 @@ export class Application {
 
     async allRooms() {
         if (!this.enabled('redisAdaptered')) return;
-        await new Promise((resolve, reject) => {
+        return await new Promise((resolve, reject) => {
             (this.io.adapter as any).allRooms((err: any, rooms: string[]) => {
                 if (err || !rooms)
                     reject(err || Error('get no rooms, remote error'));
@@ -230,6 +234,7 @@ export class Application {
 
     async remoteDisconnect(socketId: String, close: Boolean = true) {
         if (!this.enabled('redisAdaptered')) return;
+        debug('set socket %o disconnect remote server', socketId);
         await new Promise((resolve, reject) => {
             (this.io.adapter as any).remoteDisconnect(
                 socketId,

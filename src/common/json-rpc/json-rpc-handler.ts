@@ -8,22 +8,25 @@ const JsonRpcError = require('json-rpc-error');
 
 export class JSON_RPC_HANDLER extends HandlerBase {
     namespaces: any = {};
-    public authentiated: boolean;
+    public authenticated: boolean;
     constructor(
         public app: Application,
         namespaces: object,
         { eventPath = 'rpc-call', authenticated = true } = {}
     ) {
         super(eventPath);
-        this.authentiated = authenticated;
+        this.authenticated = authenticated;
         this.namespaces = namespaces;
     }
 
     register(socket: mikudos.Socket) {
-        let mikudos = socket.mikudos;
+        debug(
+            `register json-rpc service ${
+                this.authenticated ? 'with auth' : 'without auth'
+            }`
+        );
         socket.on(this.eventPath, async (request: any, callback: Function) => {
             if (!this.app.io) return;
-            socket.mikudos = mikudos;
             request.socket = socket;
             const [namespace, method] = String(request.method).split('.');
             let response: any = await this.handle(namespace, method, request);
