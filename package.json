@@ -1,6 +1,6 @@
 {
     "name": "mikudos-socketio-app",
-    "version": "0.1.33",
+    "version": "0.1.34",
     "description": "mikudos-socketio-app for connection and call methods and sync events on mikudos-socketio-app server, which is provided only for socket.io connection.",
     "main": "lib/index.js",
     "scripts": {
@@ -29,6 +29,7 @@
     },
     "dependencies": {
         "config": "^3.2.4",
+        "debug": "^4.1.1",
         "js-yaml": "^3.13.1",
         "json-rpc-error": "^2.0.0",
         "lodash": "^4.17.15",
@@ -39,6 +40,7 @@
     },
     "devDependencies": {
         "@types/config": "0.0.35",
+        "@types/debug": "^4.1.5",
         "@types/expect": "^24.3.0",
         "@types/js-yaml": "^3.12.1",
         "@types/lodash": "^4.14.149",

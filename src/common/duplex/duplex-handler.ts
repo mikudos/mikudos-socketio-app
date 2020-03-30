@@ -4,6 +4,8 @@ import { HandlerBase } from '../handler-base';
 import { EventEmitter } from 'events';
 import { Application } from '../../';
 import { mikudos } from '../../namespace';
+import Debug from 'debug';
+const debug = Debug('mikudos:duplex');
 
 export class DUPLEX_HANDLER extends HandlerBase {
     public authenticated: boolean;

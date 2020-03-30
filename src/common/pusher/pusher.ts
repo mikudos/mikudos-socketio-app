@@ -4,6 +4,8 @@ import { Application } from '../../app';
 import { EventEmitter } from 'events';
 import { Message, MessageType } from './interfaces';
 import { mikudos } from '../../namespace';
+import Debug from 'debug';
+const debug = Debug('mikudos:pusher');
 
 export class PUSHER_HANDLER extends HandlerBase {
     private pusherRequest?: any;

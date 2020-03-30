@@ -2,6 +2,8 @@ import rp from 'request-promise-native';
 import _ from 'lodash';
 import { Application } from './app';
 import { mikudos } from './namespace';
+import Debug from 'debug';
+const debug = Debug('mikudos:authentication');
 
 export class AuthenticationRequest {
     strategy?: string;

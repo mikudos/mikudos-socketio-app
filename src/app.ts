@@ -7,6 +7,8 @@ import { Authentication, AuthenticationRequest } from './authentication.class';
 import { CHAT_HANDLER, DUPLEX_HANDLER } from './common';
 import { PUSHER_HANDLER } from './common/pusher/pusher';
 import { mikudos } from './namespace';
+import Debug from 'debug';
+const debug = Debug('mikudos:app');
 
 export class Application {
     settings: any;
@@ -31,16 +33,19 @@ export class Application {
             redisConfig?: { host: string; port: number };
         } = {}
     ) {
+        rootNamespace = rootNamespace || '/';
+        debug('booting mikudos at rootNamespace %o', rootNamespace);
         this.settings = _.merge({}, config);
 
         this.enabled('redisAdaptered') &&
             (redisConfig = this.get('redisConfig'));
         if (redisConfig) {
+            debug('redisAdapter activated');
             this.enable('redisAdaptered');
             rootIo.adapter(redisAdapter(redisConfig));
         }
         this.rootNamespace = rootNamespace;
-        this.io = rootNamespace ? rootIo.of(rootNamespace) : rootIo.of('/');
+        this.io = rootIo.of(rootNamespace);
     }
 
     init() {
@@ -82,6 +87,14 @@ export class Application {
 
     socketInit() {
         this.io.on('connection', (socket: mikudos.Socket) => {
+            debug('io connected with socket: %o', socket.id);
+            socket.mikudos = {
+                app: this,
+                provider: 'socketio',
+                headers: socket.handshake.headers,
+                remoteAddress: socket.conn.remoteAddress,
+                user: null
+            };
             socket.use((reqData: any, next) => {
                 this.parseRequset(reqData, socket);
                 next();
@@ -141,16 +154,10 @@ export class Application {
     }
 
     parseRequset(request: any, socket: mikudos.Socket) {
-        socket.mikudos = {
-            app: this,
-            provider: 'socketio',
-            headers: socket.handshake.headers,
-            remoteAddress: socket.conn.remoteAddress,
-            user: null
-        };
         if (request.length === 1) return;
         if (!request[1].jsonrpc) return;
         // if request is jsonrpc request then parse the request
+        debug('parse request for json-rpc method');
         request[1] = _.pick(request[1], ['jsonrpc', 'id', 'method', 'params']);
         request[1].socket = socket;
     }

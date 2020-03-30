@@ -2,6 +2,8 @@ import _ from 'lodash';
 import { HandlerBase } from '../handler-base';
 import { Application } from '../../app';
 import { mikudos } from '../../namespace';
+import Debug from 'debug';
+const debug = Debug('mikudos:chat');
 export class CHAT_HANDLER extends HandlerBase {
     roomPath: string;
     emitToSelfPath: string;
