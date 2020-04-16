@@ -13,12 +13,12 @@ export class DUPLEX_HANDLER extends HandlerBase {
     socketStreams: { [key: string]: EventEmitter } = {};
     constructor(
         public app: Application,
-        serviceClasses: [{ key: string; sc: mikudos.DuplexServiceConstructor }],
+        serviceClasses: { key: string; sc: mikudos.DuplexServiceConstructor }[],
         { eventPath = 'stream-call', authenticated = true } = {}
     ) {
         super(eventPath);
         this.authenticated = authenticated;
-        serviceClasses.forEach(c => {
+        serviceClasses.forEach((c) => {
             this.namespaces[c.key] = new c.sc(this, app);
         });
     }
@@ -71,15 +71,15 @@ export class DUPLEX_HANDLER extends HandlerBase {
                     error: {
                         message: 'you are not in the corresponding room',
                         class: 'Wrong Room',
-                        code: 2
-                    }
+                        code: 2,
+                    },
                 };
         }
         let event = get(this.socketStreams, socket.id);
         if (!event || !(event instanceof EventEmitter)) {
             event = new EventEmitter();
             let len = 0;
-            forOwn(this.namespaces, space => {
+            forOwn(this.namespaces, (space) => {
                 len += keysIn(this.namespaces).length;
             });
             event.setMaxListeners(len > 10 ? len : 10);
@@ -140,12 +140,12 @@ export class DUPLEX_HANDLER extends HandlerBase {
         if (!event)
             return {
                 error: {
-                    message: 'Cancel Error, Request may be closed'
-                }
+                    message: 'Cancel Error, Request may be closed',
+                },
             };
         // cancel first
         event.emit(`${namespace}.${method} cancel`, {
-            mikudos: socket.mikudos
+            mikudos: socket.mikudos,
         });
         event.removeAllListeners(`${namespace}.${method}`);
     }
