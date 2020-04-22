@@ -9,8 +9,11 @@ const debug = Debug('mikudos:duplex');
 
 export class DUPLEX_HANDLER extends HandlerBase {
     public authenticated: boolean;
-    namespaces: { [key: string]: mikudos.DuplexService } = {};
-    socketStreams: { [key: string]: EventEmitter } = {};
+    namespaces: { [namespace: string]: mikudos.DuplexService } = {};
+    socketStreams: { [socket_id: string]: EventEmitter } = {};
+    handledMethods: {
+        [socket_id: string]: { namespace: string; method: string }[];
+    } = {};
     constructor(
         public app: Application,
         serviceClasses: { key: string; sc: mikudos.DuplexServiceConstructor }[],
@@ -31,6 +34,11 @@ export class DUPLEX_HANDLER extends HandlerBase {
         );
         socket.on(this.eventPath, async (data, callback: Function) => {
             const [namespace, method] = String(data.method).split('.');
+            this._saveSocketHandledMethodsToHandledMethods(
+                socket.id,
+                namespace,
+                method
+            );
             let res = await this.handle(
                 namespace,
                 method,
@@ -150,13 +158,25 @@ export class DUPLEX_HANDLER extends HandlerBase {
         event.removeAllListeners(`${namespace}.${method}`);
     }
 
-    cancelAllOnSocket(id: string) {
-        let event = this.socketStreams[id];
-        if (event) {
-            debug('socket has duplex eventStream to be remove: %o', id);
-            event.removeAllListeners();
-            unset(this.socketStreams, id);
+    _saveSocketHandledMethodsToHandledMethods(
+        socketId: string,
+        namespace: string,
+        method: string
+    ) {
+        if (!this.handledMethods?.[socketId])
+            this.handledMethods[socketId] = [];
+        this.handledMethods[socketId].push({ namespace, method });
+    }
+
+    cancelAllOnSocket(socket: mikudos.Socket) {
+        let socketId = socket.id;
+        // emit cancel event to cancel all server method
+        if (this.handledMethods[socketId]) {
+            this.handledMethods[socketId].every((value) => {
+                this.cancel(value.namespace, value.method, socket);
+            });
         }
+        unset(this.socketStreams, socketId);
         return { result: { success: true } };
     }
 }

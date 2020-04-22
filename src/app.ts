@@ -27,7 +27,7 @@ export class Application {
         public rootIo: socket.Server,
         {
             rootNamespace,
-            redisConfig
+            redisConfig,
         }: {
             rootNamespace?: string;
             redisConfig?: { host: string; port: number };
@@ -93,7 +93,7 @@ export class Application {
                 provider: 'socketio',
                 headers: socket.handshake.headers,
                 remoteAddress: socket.conn.remoteAddress,
-                user: null
+                user: null,
             };
             socket.use((reqData: any, next) => {
                 this.parseRequset(reqData, socket);
@@ -132,7 +132,7 @@ export class Application {
                 debug('all rooms leaved');
                 if (this.duplex_services) {
                     debug('canncel processing duplex service');
-                    this.duplex_services.cancelAllOnSocket(socket.id);
+                    this.duplex_services.cancelAllOnSocket(socket);
                 }
                 /* … */
             });
@@ -150,7 +150,7 @@ export class Application {
             'publishFilter method provided, publish event to all filtered socket'
         );
         const rooms = await this.publishFilter(this, this.io);
-        rooms.map(clientRoom => {
+        rooms.map((clientRoom) => {
             this.io.to(clientRoom).emit('rpc-call event', response);
         });
     }
