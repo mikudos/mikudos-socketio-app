@@ -154,6 +154,7 @@ export class DUPLEX_HANDLER extends HandlerBase {
         // cancel first
         event.emit(`${namespace}.${method} cancel`, socket.mikudos);
         event.removeAllListeners(`${namespace}.${method}`);
+        return { result: { success: true } };
     }
 
     _saveSocketHandledMethodsToHandledMethods(
