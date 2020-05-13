@@ -2,9 +2,9 @@
 
 # [![Mikudos](https://raw.githubusercontent.com/mikudos/doc/master/mikudos-logo.png)](https://mikudos.github.io/doc)
 
-# MIKUDOS SOCKETIO SERVER
+# MIKUDOS SOCKETIO GATE
 
-mikudos-socketio-server.
+mikudos-socketio-gate.
 
 ![node version](https://img.shields.io/node/v/mikudos-socketio-app) ![version](https://img.shields.io/github/package-json/v/mikudos/mikudos-socketio-app) [![npm version](https://img.shields.io/npm/v/mikudos-socketio-app)](https://www.npmjs.com/package/mikudos-socketio-app) ![license](https://img.shields.io/npm/l/mikudos-socketio-app) ![downloads](https://img.shields.io/npm/dw/mikudos-socketio-app) ![collaborators](https://img.shields.io/npm/collaborators/mikudos-socketio-app) ![typescript](https://img.shields.io/npm/types/mikudos-socketio-app)
 
@@ -14,18 +14,22 @@ mikudos-socketio-server.
 
 ## Usage
 
-Import the mikudos-socketio-server module:
+```bash
+npm install mikudos-socketio-app --save
+```
+
+Import the mikudos-socketio-app module:
 
 ```ts
 import {
-    Application,
-    Authentication,
-    AuthenticationRequest,
-    RpcServiceMethods,
-    JSON_RPC_HANDLER,
-    CHAT_HANDLER,
-    DUPLEX_HANDLER
-} from 'mikudos-socketio-server';
+  Application,
+  Authentication,
+  AuthenticationRequest,
+  RpcServiceMethods,
+  JSON_RPC_HANDLER,
+  CHAT_HANDLER,
+  DUPLEX_HANDLER,
+} from 'mikudos-socketio-app';
 
 import http from 'http';
 import socket from 'socket.io';
@@ -55,14 +59,14 @@ console.log('socket.io server started at port: ' + app.get('port'));
 
 ```js
 var {
-    Application,
-    Authentication,
-    AuthenticationRequest,
-    RpcServiceMethods,
-    JSON_RPC_HANDLER,
-    CHAT_HANDLER,
-    DUPLEX_HANDLER
-} = require('mikudos-socketio-server');
+  Application,
+  Authentication,
+  AuthenticationRequest,
+  RpcServiceMethods,
+  JSON_RPC_HANDLER,
+  CHAT_HANDLER,
+  DUPLEX_HANDLER,
+} = require('mikudos-socketio-app');
 ```
 
 ![mikudos](https://raw.githubusercontent.com/mikudos/doc/master/assets/images/structure.png)
