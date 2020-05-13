@@ -1,0 +1,1 @@
+{"version":3,"file":"handler-base.js","sourceRoot":"","sources":["../../src/common/handler-base.ts"],"names":[],"mappings":";;AAEA,MAAa,WAAW;IACpB,YAAmB,SAAiB;QAAjB,cAAS,GAAT,SAAS,CAAQ;IAAG,CAAC;IAExC,KAAK,CAAC,SAAS,CAAC,IAAY,EAAE,MAAsB;QAChD,OAAO,CAAC,MAAM,MAAM,CAAC,OAAO,CAAC,GAAG,CAAC,WAAW,CAAC,MAAM,CAAC,CAAC,CAAC,QAAQ,CAAC,IAAI,CAAC,CAAC;IACzE,CAAC;CACJ;AAND,kCAMC"}

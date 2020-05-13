@@ -1,11 +1,13 @@
 {
     "name": "mikudos-socketio-app",
-    "version": "0.0.28",
+    "version": "0.2.3",
     "description": "mikudos-socketio-app for connection and call methods and sync events on mikudos-socketio-app server, which is provided only for socket.io connection.",
     "main": "lib/index.js",
     "scripts": {
-        "test": "ts-mocha \"test/**/*.ts\" --recursive --exit",
-        "compile": "shx rm -rf lib/ && tsc"
+        "test": "ts-mocha \"test/*.ts\" --recursive --exit",
+        "test-pusher": "ts-mocha \"test/handlers/pusher.test.ts\" --exit --timeout 61000",
+        "compile": "shx rm -rf lib/ && tsc",
+        "test-publish": ""
     },
     "repository": {
         "type": "git",
@@ -27,6 +29,7 @@
     },
     "dependencies": {
         "config": "^3.2.4",
+        "debug": "^4.1.1",
         "js-yaml": "^3.13.1",
         "json-rpc-error": "^2.0.0",
         "lodash": "^4.17.15",
@@ -37,17 +40,22 @@
     },
     "devDependencies": {
         "@types/config": "0.0.35",
+        "@types/debug": "^4.1.5",
         "@types/expect": "^24.3.0",
         "@types/js-yaml": "^3.12.1",
         "@types/lodash": "^4.14.149",
         "@types/mocha": "^5.2.7",
+        "@types/request-promise-native": "^1.0.17",
         "@types/socket.io": "^2.1.4",
         "@types/socket.io-client": "^1.4.32",
+        "grpc": "^1.24.2",
+        "grpc-caller": "^0.13.0",
         "husky": "^3.1.0",
         "mikudos-socketio-client": "0.0.7",
         "mocha": "^6.2.2",
         "shx": "^0.3.2",
         "ts-mocha": "^6.0.0",
+        "ts-node": "^8.6.2",
         "typescript": "^3.5.3"
     },
     "files": [
@@ -60,7 +68,6 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm test",
             "pre-push": "npm test"
         }
     },

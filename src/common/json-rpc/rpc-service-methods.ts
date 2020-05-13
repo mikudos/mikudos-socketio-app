@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import Debug from 'debug';
+const debug = Debug('mikudos:json-rpc');
 
 export class RpcServiceMethods {
     hooks: any;
@@ -16,11 +18,11 @@ export class RpcServiceMethods {
             result.result = await this.service[method](request, request.params);
         };
         const passList = _.compact([
-            ...this.hooks.before.all,
-            ...(this.hooks.before[method] || []),
+            ...(this.hooks.before?.all || []),
+            ...(this.hooks.before?.[method] || []),
             handleFunc,
-            ...(this.hooks.after[method] || []),
-            ...this.hooks.after.all
+            ...(this.hooks.after?.[method] || []),
+            ...(this.hooks.after?.all || [])
         ]);
         for await (const hook of passList) {
             await hook.call(this, request, result);
