@@ -102,7 +102,6 @@ export class Authentication {
   }
 
   async authenticate(body: AuthenticationRequest) {
-    let option = { body, ...this.requsetOption };
     return await rp({ body, ...this.requsetOption });
   }
 }
